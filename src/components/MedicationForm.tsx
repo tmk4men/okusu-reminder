@@ -119,7 +119,7 @@ export function MedicationForm({ med, schedules = [], onClose }: Props) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-30 bg-ink-900/80 backdrop-blur-sm"
+      className="fixed inset-0 z-30 bg-black/35 backdrop-blur-sm"
     >
       <motion.div
         initial={{ y: '100%' }}
@@ -138,7 +138,7 @@ export function MedicationForm({ med, schedules = [], onClose }: Props) {
           <button
             onClick={save}
             disabled={!name.trim()}
-            className="rounded-full bg-mint-400 px-4 py-1.5 text-sm font-medium text-ink-900 disabled:opacity-30"
+            className="rounded-full bg-mint-400 px-4 py-1.5 text-sm font-medium text-ink-50 disabled:opacity-30"
           >
             保存
           </button>
@@ -176,7 +176,7 @@ export function MedicationForm({ med, schedules = [], onClose }: Props) {
                   aria-label={c}
                 >
                   {c === color && (
-                    <Check size={16} className="absolute inset-0 m-auto text-ink-900" strokeWidth={3} />
+                    <Check size={16} className="absolute inset-0 m-auto text-ink-50" strokeWidth={3} />
                   )}
                 </button>
               ))}
@@ -206,7 +206,7 @@ export function MedicationForm({ med, schedules = [], onClose }: Props) {
                       type="button"
                       onClick={() => updateDraft(idx, { mode: 'fixed' })}
                       className={`rounded-full px-3 py-1.5 ${
-                        d.mode === 'fixed' ? 'bg-mint-400 text-ink-900' : 'text-ink-300'
+                        d.mode === 'fixed' ? 'bg-mint-400 text-ink-50' : 'text-ink-300'
                       }`}
                     >
                       定刻
@@ -215,7 +215,7 @@ export function MedicationForm({ med, schedules = [], onClose }: Props) {
                       type="button"
                       onClick={() => updateDraft(idx, { mode: 'relative' })}
                       className={`rounded-full px-3 py-1.5 ${
-                        d.mode === 'relative' ? 'bg-mint-400 text-ink-900' : 'text-ink-300'
+                        d.mode === 'relative' ? 'bg-mint-400 text-ink-50' : 'text-ink-300'
                       }`}
                     >
                       食事から
@@ -288,7 +288,7 @@ export function MedicationForm({ med, schedules = [], onClose }: Props) {
                         type="button"
                         onClick={() => toggleDay(idx, day.v)}
                         className={`h-8 w-8 rounded-full text-sm transition-colors ${
-                          on ? 'bg-mint-400 text-ink-900' : 'bg-ink-800 text-ink-300'
+                          on ? 'bg-mint-400 text-ink-50' : 'bg-ink-800 text-ink-300'
                         }`}
                       >
                         {day.label}

@@ -27,7 +27,7 @@ export function Medications() {
         <motion.button
           whileTap={{ scale: 0.92 }}
           onClick={() => setEditing({ open: true })}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-mint-400 text-ink-900 shadow-lg shadow-mint-500/20"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-mint-400 text-ink-50 shadow-lg shadow-mint-500/20"
           aria-label="追加"
         >
           <Plus size={22} strokeWidth={2.6} />

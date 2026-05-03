@@ -126,7 +126,7 @@ export function Today() {
                       <motion.button
                         whileTap={{ scale: 0.92 }}
                         onClick={() => take(i)}
-                        className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-mint-400 text-ink-900 shadow-lg shadow-mint-500/20"
+                        className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-mint-400 text-ink-50 shadow-lg shadow-mint-500/20"
                         aria-label="飲んだ"
                       >
                         <Check size={22} strokeWidth={3} />
@@ -155,7 +155,7 @@ export function Today() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  <div className="flex items-center gap-3 rounded-xl border border-ink-700/60 bg-ink-800/50 p-3">
+                  <div className="flex items-center gap-3 rounded-xl border border-ink-700/70 bg-ink-700/30 p-3">
                     <span
                       className="block h-8 w-1 shrink-0 rounded-full opacity-50"
                       style={{ background: i.med.color }}
@@ -184,7 +184,7 @@ export function Today() {
       )}
 
       {items.length === 0 && meds.length > 0 && (
-        <div className="mt-12 rounded-2xl border border-ink-700 bg-ink-800/50 p-6 text-center text-sm text-ink-300">
+        <div className="mt-12 rounded-2xl border border-ink-700 bg-ink-700/30 p-6 text-center text-sm text-ink-300">
           今日（{['日','月','火','水','木','金','土'][wd]}曜）のスケジュールはありません
         </div>
       )}
