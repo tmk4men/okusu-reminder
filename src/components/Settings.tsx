@@ -44,7 +44,7 @@ export function Settings() {
   }
 
   return (
-    <div className="px-5 pt-12">
+    <div className="px-5 pt-16">
       <header className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight text-ink-50">設定</h1>
       </header>

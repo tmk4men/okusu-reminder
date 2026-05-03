@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CalendarCheck, Pill, Settings as SettingsIcon, Menu as MenuIcon } from 'lucide-react'
 import type { Tab } from '../App'
 import { MenuDrawer } from './MenuDrawer'
 import { HowToModal } from './HowToModal'
+import { JourneyModal } from './JourneyModal'
 
 interface Props {
   active: Tab
@@ -20,6 +21,13 @@ const TABS: { id: Tab; label: string; Icon: typeof Pill }[] = [
 export function Layout({ active, onChange, children }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [howToOpen, setHowToOpen] = useState(false)
+  const [journeyOpen, setJourneyOpen] = useState(false)
+
+  useEffect(() => {
+    const open = () => setJourneyOpen(true)
+    window.addEventListener('open-journey', open)
+    return () => window.removeEventListener('open-journey', open)
+  }, [])
 
   return (
     <div className="mx-auto flex h-full max-w-md flex-col bg-ink-900">
@@ -71,9 +79,11 @@ export function Layout({ active, onChange, children }: Props) {
           <MenuDrawer
             onClose={() => setMenuOpen(false)}
             onOpenHowTo={() => setHowToOpen(true)}
+            onOpenJourney={() => setJourneyOpen(true)}
           />
         )}
         {howToOpen && <HowToModal onClose={() => setHowToOpen(false)} />}
+        {journeyOpen && <JourneyModal onClose={() => setJourneyOpen(false)} />}
       </AnimatePresence>
     </div>
   )

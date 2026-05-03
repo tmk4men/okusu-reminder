@@ -21,7 +21,7 @@ export function Medications() {
   }
 
   return (
-    <div className="px-5 pt-12">
+    <div className="px-5 pt-16">
       <header className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-semibold tracking-tight text-ink-50">おくすり</h1>
         <motion.button

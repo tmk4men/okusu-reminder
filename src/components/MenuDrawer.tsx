@@ -1,12 +1,13 @@
 import { motion } from 'framer-motion'
-import { BookOpen, Heart, X, ExternalLink } from 'lucide-react'
+import { BookOpen, Heart, X, Sparkles } from 'lucide-react'
 
 interface Props {
   onClose: () => void
   onOpenHowTo: () => void
+  onOpenJourney: () => void
 }
 
-export function MenuDrawer({ onClose, onOpenHowTo }: Props) {
+export function MenuDrawer({ onClose, onOpenHowTo, onOpenJourney }: Props) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -34,6 +35,18 @@ export function MenuDrawer({ onClose, onOpenHowTo }: Props) {
           <li>
             <button
               onClick={() => {
+                onOpenJourney()
+                onClose()
+              }}
+              className="flex w-full items-center gap-3 px-5 py-4 text-left text-ink-100 active:bg-ink-700"
+            >
+              <Sparkles size={18} className="text-coral-500" />
+              <span>あなたのあゆみ</span>
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => {
                 onOpenHowTo()
                 onClose()
               }}
@@ -43,22 +56,11 @@ export function MenuDrawer({ onClose, onOpenHowTo }: Props) {
               <span>使い方</span>
             </button>
           </li>
-          <li>
-            <a
-              href="https://github.com/tmk4men/okusu-reminder"
-              target="_blank"
-              rel="noreferrer"
-              className="flex w-full items-center gap-3 px-5 py-4 text-left text-ink-100 active:bg-ink-700"
-            >
-              <ExternalLink size={18} className="text-ink-400" />
-              <span>GitHub</span>
-            </a>
-          </li>
         </ul>
 
         <div className="absolute inset-x-0 bottom-0 border-t border-ink-700 px-5 py-4 text-center text-xs text-ink-400">
           <p className="inline-flex items-center gap-1">
-            <Heart size={12} /> おくすリマインダー v0.3
+            <Heart size={12} /> おくすリマインダー v0.4
           </p>
           <p className="mt-1">by tmk4men</p>
         </div>
