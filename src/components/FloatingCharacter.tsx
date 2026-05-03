@@ -44,9 +44,9 @@ export function FloatingCharacter() {
     >
       {w > SIZE + 8 && (
         <motion.div
-          animate={{ x: [4, w - SIZE - 4, 4] }}
+          animate={{ x: [8, w - SIZE - 8, 8] }}
           transition={{
-            duration: 22,
+            duration: 48,
             repeat: Infinity,
             ease: 'easeInOut',
           }}
@@ -58,13 +58,13 @@ export function FloatingCharacter() {
             onClick={open}
             animate={
               jumping
-                ? { y: [-2, -32, -2], rotate: [0, -6, 0] }
-                : { y: [0, -4, 0], rotate: [0, 1.5, 0, -1.5, 0] }
+                ? { y: [0, -22, 0] }
+                : { y: [0, -2, 0] }
             }
             transition={
               jumping
                 ? { duration: 0.7, ease: 'easeOut' }
-                : { duration: 1.8, repeat: Infinity, ease: 'easeInOut' }
+                : { duration: 3.2, repeat: Infinity, ease: 'easeInOut' }
             }
             className="pointer-events-auto block rounded-full focus:outline-none"
             aria-label="あなたのあゆみを見る"
