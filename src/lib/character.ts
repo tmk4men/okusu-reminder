@@ -1,4 +1,4 @@
-export type Stage = 'egg' | 'chick' | 'novice' | 'sage' | 'master'
+export type Stage = 'egg' | 'hatched' | 'toddler' | 'child' | 'adult' | 'master'
 
 export interface StageDef {
   stage: Stage
@@ -9,10 +9,11 @@ export interface StageDef {
 
 export const STAGES: StageDef[] = [
   { stage: 'egg', minDoses: 0, name: 'たまご', message: 'これから生まれるよ' },
-  { stage: 'chick', minDoses: 10, name: 'ぴよのん', message: 'ふ化したよ！' },
-  { stage: 'novice', minDoses: 30, name: 'のんちゃん', message: 'のんちゃんになった！' },
-  { stage: 'sage', minDoses: 100, name: 'かしこのん', message: '賢者に進化！' },
-  { stage: 'master', minDoses: 300, name: 'のんマスター', message: 'マスターに到達！' },
+  { stage: 'hatched', minDoses: 1, name: 'ふ化したて', message: '生まれたよ！' },
+  { stage: 'toddler', minDoses: 5, name: 'よちよち', message: 'よちよち歩いてる' },
+  { stage: 'child', minDoses: 30, name: 'こどもペン', message: '元気いっぱい' },
+  { stage: 'adult', minDoses: 100, name: 'おとなペン', message: '頼れる相棒' },
+  { stage: 'master', minDoses: 300, name: 'のんマスター', message: '王者のオーラ' },
 ]
 
 export interface CharacterState {

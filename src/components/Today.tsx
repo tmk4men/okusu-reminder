@@ -11,10 +11,8 @@ import { computeStreak, type StreakInfo } from '../lib/streak'
 import { snoozeSchedule, SNOOZE_MINUTES } from '../lib/notify'
 import { vibrate } from '../lib/haptic'
 import { pop, celebrateAllDone } from '../lib/celebrate'
-import { characterFromTotal, type CharacterState } from '../lib/character'
 import { StreakBadge } from './StreakBadge'
 import { MiniCalendar } from './HistoryCalendar'
-import { Character } from './Character'
 
 interface Item {
   schedule: Schedule
@@ -41,10 +39,8 @@ export function Today() {
   const snoozeMap = useMemo(() => new Map(snoozes.map((s) => [s.scheduleId, s.until])), [snoozes])
 
   const [streak, setStreak] = useState<StreakInfo>({ current: 0, best: 0, thisWeek: 0 })
-  const [character, setCharacter] = useState<CharacterState>(() => characterFromTotal(0))
   useEffect(() => {
     computeStreak().then(setStreak)
-    db.logs.count().then((n) => setCharacter(characterFromTotal(n)))
   }, [logs.length])
 
   const wd = todayWeekday()
@@ -108,6 +104,7 @@ export function Today() {
       status: 'taken',
       recordedAt: Date.now(),
     })
+    window.dispatchEvent(new CustomEvent('dose-taken'))
   }
   async function undo(i: Item) {
     if (!i.log?.id) return
@@ -124,34 +121,21 @@ export function Today() {
   return (
     <div className="px-5 pt-16">
       <header className="mb-6">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <p className="text-sm text-ink-300">{greeting}</p>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight text-ink-50">
-              {allDoneToday ? 'おつかれさま！' : 'のんだ？'}
-            </h1>
-            <p className="mt-2 text-sm text-ink-300">
-              {meds.length === 0
-                ? 'まずはおくすりを登録しましょう'
-                : pending.length === 0
-                ? items.length === 0
-                  ? '今日のぶんはありません'
-                  : '今日のぶん、ぜんぶ完了！'
-                : `あと ${pending.length} 回`}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new CustomEvent('open-journey'))}
-            className="shrink-0 rounded-full"
-            aria-label="あゆみを見る"
-          >
-            <Character stage={character.stage.stage} size={72} />
-          </button>
-        </div>
-        <div className="mt-3 flex items-center gap-2">
+        <p className="text-sm text-ink-300">{greeting}</p>
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-ink-50">
+          {allDoneToday ? 'おつかれさま！' : 'のんだ？'}
+        </h1>
+        <p className="mt-2 text-sm text-ink-300">
+          {meds.length === 0
+            ? 'まずはおくすりを登録しましょう'
+            : pending.length === 0
+            ? items.length === 0
+              ? '今日のぶんはありません'
+              : '今日のぶん、ぜんぶ完了！'
+            : `あと ${pending.length} 回`}
+        </p>
+        <div className="mt-3">
           <StreakBadge streak={streak} />
-          <span className="text-[11px] text-ink-400">{character.stage.name}</span>
         </div>
       </header>
 

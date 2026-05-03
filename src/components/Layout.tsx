@@ -5,6 +5,7 @@ import type { Tab } from '../App'
 import { MenuDrawer } from './MenuDrawer'
 import { HowToModal } from './HowToModal'
 import { JourneyModal } from './JourneyModal'
+import { FloatingCharacter } from './FloatingCharacter'
 
 interface Props {
   active: Tab
@@ -30,7 +31,7 @@ export function Layout({ active, onChange, children }: Props) {
   }, [])
 
   return (
-    <div className="mx-auto flex h-full max-w-md flex-col bg-ink-900">
+    <div className="relative mx-auto flex h-full max-w-md flex-col bg-ink-900">
       <button
         type="button"
         onClick={() => setMenuOpen(true)}
@@ -41,6 +42,8 @@ export function Layout({ active, onChange, children }: Props) {
       </button>
 
       <main className="flex-1 overflow-y-auto pb-24">{children}</main>
+
+      <FloatingCharacter />
 
       <nav className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-md border-t border-ink-700 bg-ink-900/95 backdrop-blur">
         <ul className="flex">
