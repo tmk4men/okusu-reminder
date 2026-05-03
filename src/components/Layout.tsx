@@ -1,6 +1,9 @@
-import { motion } from 'framer-motion'
-import { CalendarCheck, Pill, Settings as SettingsIcon } from 'lucide-react'
+import { useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { CalendarCheck, Pill, Settings as SettingsIcon, Menu as MenuIcon } from 'lucide-react'
 import type { Tab } from '../App'
+import { MenuDrawer } from './MenuDrawer'
+import { HowToModal } from './HowToModal'
 
 interface Props {
   active: Tab
@@ -15,9 +18,22 @@ const TABS: { id: Tab; label: string; Icon: typeof Pill }[] = [
 ]
 
 export function Layout({ active, onChange, children }: Props) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [howToOpen, setHowToOpen] = useState(false)
+
   return (
     <div className="mx-auto flex h-full max-w-md flex-col bg-ink-900">
+      <button
+        type="button"
+        onClick={() => setMenuOpen(true)}
+        className="fixed right-4 top-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full border border-ink-700 bg-ink-800/80 text-ink-200 backdrop-blur"
+        aria-label="メニュー"
+      >
+        <MenuIcon size={20} />
+      </button>
+
       <main className="flex-1 overflow-y-auto pb-24">{children}</main>
+
       <nav className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-md border-t border-ink-700 bg-ink-900/95 backdrop-blur">
         <ul className="flex">
           {TABS.map(({ id, label, Icon }) => {
@@ -38,7 +54,7 @@ export function Layout({ active, onChange, children }: Props) {
                   )}
                   <Icon
                     size={22}
-                    className={on ? 'text-mint-400' : 'text-ink-300'}
+                    className={on ? 'text-mint-500' : 'text-ink-300'}
                     strokeWidth={on ? 2.4 : 1.8}
                   />
                   <span className={on ? 'text-ink-50' : 'text-ink-300'}>{label}</span>
@@ -49,6 +65,16 @@ export function Layout({ active, onChange, children }: Props) {
         </ul>
         <div className="h-[env(safe-area-inset-bottom)]" />
       </nav>
+
+      <AnimatePresence>
+        {menuOpen && (
+          <MenuDrawer
+            onClose={() => setMenuOpen(false)}
+            onOpenHowTo={() => setHowToOpen(true)}
+          />
+        )}
+        {howToOpen && <HowToModal onClose={() => setHowToOpen(false)} />}
+      </AnimatePresence>
     </div>
   )
 }
