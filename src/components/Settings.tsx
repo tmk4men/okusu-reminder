@@ -145,11 +145,10 @@ export function Settings() {
         </p>
       </section>
 
-      <footer className="mt-12 space-y-2 text-center text-xs text-ink-400">
+      <footer className="mt-12 text-center text-xs text-ink-400">
         <p className="inline-flex items-center gap-1">
-          <Heart size={12} /> おくすリマインダー v0.2
+          <Heart size={12} /> おくすリマインダー
         </p>
-        <p>by tmk4men</p>
       </footer>
     </div>
   )
