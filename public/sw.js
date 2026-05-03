@@ -45,9 +45,12 @@ self.addEventListener('notificationclick', (e) => {
   e.notification.close()
   e.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
-      const url = action === 'taken' && data.scheduleId
-        ? `/?take=${data.scheduleId}`
-        : '/'
+      const url =
+        action === 'taken' && data.scheduleId
+          ? `/?take=${data.scheduleId}`
+          : action === 'later' && data.scheduleId
+          ? `/?later=${data.scheduleId}`
+          : '/'
       const client = clients.find((c) => c.url.includes(self.registration.scope))
       if (client) {
         client.focus()

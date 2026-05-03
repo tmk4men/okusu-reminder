@@ -35,6 +35,11 @@ export interface Setting {
   value: unknown
 }
 
+export interface Snooze {
+  scheduleId: number
+  until: number
+}
+
 export interface MealTimes {
   breakfast: string
   lunch: string

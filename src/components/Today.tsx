@@ -1,12 +1,18 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Undo2 } from 'lucide-react'
+import { Check, Undo2, Clock } from 'lucide-react'
 import { db } from '../db/schema'
 import type { Medication, Schedule, DoseLog, MealTimes } from '../db/types'
 import { DEFAULT_MEAL_TIMES } from '../db/types'
 import { todayKey, todayWeekday, nowMinutes } from '../lib/date'
 import { describeSchedule, isToday, scheduledMinutes, scheduledTimeStr } from '../lib/schedule'
+import { computeStreak, type StreakInfo } from '../lib/streak'
+import { snoozeSchedule, SNOOZE_MINUTES } from '../lib/notify'
+import { vibrate } from '../lib/haptic'
+import { pop, celebrateAllDone } from '../lib/celebrate'
+import { StreakBadge } from './StreakBadge'
+import { MiniCalendar } from './HistoryCalendar'
 
 interface Item {
   schedule: Schedule
@@ -14,6 +20,11 @@ interface Item {
   scheduledMin: number
   timeStr: string
   log?: DoseLog
+}
+
+function formatRecordedAt(ts: number): string {
+  const d = new Date(ts)
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
 export function Today() {
@@ -24,6 +35,13 @@ export function Today() {
   const logs = useLiveQuery(() => db.logs.where('date').equals(dateKey).toArray(), [dateKey]) ?? []
   const mealRow = useLiveQuery(() => db.settings.get('mealTimes'), [])
   const meals = ((mealRow?.value as MealTimes) ?? DEFAULT_MEAL_TIMES) as MealTimes
+  const snoozes = useLiveQuery(() => db.snoozes.toArray()) ?? []
+  const snoozeMap = useMemo(() => new Map(snoozes.map((s) => [s.scheduleId, s.until])), [snoozes])
+
+  const [streak, setStreak] = useState<StreakInfo>({ current: 0, best: 0, thisWeek: 0 })
+  useEffect(() => {
+    computeStreak().then(setStreak)
+  }, [logs.length])
 
   const wd = todayWeekday()
   const medMap = useMemo(() => new Map(allMeds.map((m) => [m.id!, m])), [allMeds])
@@ -49,6 +67,21 @@ export function Today() {
   const pending = items.filter((i) => !i.log)
   const done = items.filter((i) => i.log)
   const now = nowMinutes()
+  const nowMs = Date.now()
+
+  // celebrate when going from pending>0 to pending=0
+  const prevPending = useRef<number>(pending.length)
+  useEffect(() => {
+    if (
+      items.length > 0 &&
+      pending.length === 0 &&
+      prevPending.current > 0
+    ) {
+      celebrateAllDone()
+      vibrate('celebrate')
+    }
+    prevPending.current = pending.length
+  }, [pending.length, items.length])
 
   const greeting = useMemo(() => {
     const h = new Date().getHours()
@@ -58,7 +91,13 @@ export function Today() {
     return 'こんばんは'
   }, [])
 
-  async function take(i: Item) {
+  async function take(i: Item, evt?: React.MouseEvent) {
+    if (evt) {
+      const x = evt.clientX / window.innerWidth
+      const y = evt.clientY / window.innerHeight
+      pop({ x, y })
+    }
+    vibrate('success')
     await db.logs.add({
       scheduleId: i.schedule.id!,
       date: dateKey,
@@ -68,15 +107,22 @@ export function Today() {
   }
   async function undo(i: Item) {
     if (!i.log?.id) return
+    vibrate('tap')
     await db.logs.delete(i.log.id)
   }
+  async function later(i: Item) {
+    vibrate('tap')
+    await snoozeSchedule(i.schedule.id!)
+  }
+
+  const allDoneToday = items.length > 0 && pending.length === 0
 
   return (
     <div className="px-5 pt-12">
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="text-sm text-ink-300">{greeting}</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight text-ink-50">
-          のんだ？
+          {allDoneToday ? 'おつかれさま！' : 'のんだ？'}
         </h1>
         <p className="mt-2 text-sm text-ink-300">
           {meds.length === 0
@@ -87,6 +133,9 @@ export function Today() {
               : '今日のぶん、ぜんぶ完了！'
             : `あと ${pending.length} 回`}
         </p>
+        <div className="mt-3">
+          <StreakBadge streak={streak} />
+        </div>
       </header>
 
       {pending.length > 0 && (
@@ -98,6 +147,8 @@ export function Today() {
             <AnimatePresence initial={false}>
               {pending.map((i) => {
                 const overdue = i.scheduledMin <= now
+                const snoozedUntil = snoozeMap.get(i.schedule.id!)
+                const snoozed = snoozedUntil && snoozedUntil > nowMs
                 return (
                   <motion.li
                     key={i.schedule.id}
@@ -106,7 +157,7 @@ export function Today() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.2 } }}
                   >
-                    <div className="flex items-center gap-3 rounded-2xl border border-ink-700 bg-ink-800 p-4 shadow-sm">
+                    <div className="flex items-center gap-3 rounded-2xl border border-ink-700 bg-ink-800 p-4 shadow-sm shadow-ink-300/10">
                       <span
                         className="block h-12 w-1.5 shrink-0 rounded-full"
                         style={{ background: i.med.color }}
@@ -115,18 +166,29 @@ export function Today() {
                         <p className="truncate font-medium text-ink-50">{i.med.name}</p>
                         <p className="text-xs text-ink-300">
                           {i.med.dose} ・ {describeSchedule(i.schedule)}
-                          {overdue && (
-                            <span className="ml-2 text-coral-300">予定時刻</span>
-                          )}
+                          {snoozed ? (
+                            <span className="ml-2 text-ink-400">
+                              {Math.ceil((snoozedUntil! - nowMs) / 60000)}分後
+                            </span>
+                          ) : overdue ? (
+                            <span className="ml-2 text-coral-500">予定時刻</span>
+                          ) : null}
                         </p>
                       </div>
-                      <p className="mr-1 text-sm tabular-nums text-ink-200">
-                        {i.timeStr}
-                      </p>
+                      <p className="mr-1 text-sm tabular-nums text-ink-200">{i.timeStr}</p>
                       <motion.button
-                        whileTap={{ scale: 0.92 }}
-                        onClick={() => take(i)}
-                        className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-mint-400 text-ink-50 shadow-lg shadow-mint-500/20"
+                        whileTap={{ scale: 0.88 }}
+                        onClick={() => later(i)}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-ink-700 text-ink-300"
+                        aria-label={`${SNOOZE_MINUTES}分あとで`}
+                        title={`${SNOOZE_MINUTES}分あとで`}
+                      >
+                        <Clock size={16} />
+                      </motion.button>
+                      <motion.button
+                        whileTap={{ scale: 0.88 }}
+                        onClick={(e) => take(i, e)}
+                        className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-mint-400 text-ink-50 shadow-lg shadow-mint-500/30"
                         aria-label="飲んだ"
                       >
                         <Check size={22} strokeWidth={3} />
@@ -141,7 +203,7 @@ export function Today() {
       )}
 
       {done.length > 0 && (
-        <section>
+        <section className="mb-8">
           <h2 className="mb-3 text-xs font-medium uppercase tracking-widest text-ink-400">
             のんだ
           </h2>
@@ -165,7 +227,10 @@ export function Today() {
                         {i.med.name}
                       </p>
                       <p className="text-[11px] text-ink-400">
-                        {i.timeStr} ・ {i.med.dose}
+                        {i.log?.recordedAt
+                          ? `${formatRecordedAt(i.log.recordedAt)} にのんだ`
+                          : i.timeStr}
+                        ・ {i.med.dose}
                       </p>
                     </div>
                     <button
@@ -184,10 +249,14 @@ export function Today() {
       )}
 
       {items.length === 0 && meds.length > 0 && (
-        <div className="mt-12 rounded-2xl border border-ink-700 bg-ink-700/30 p-6 text-center text-sm text-ink-300">
-          今日（{['日','月','火','水','木','金','土'][wd]}曜）のスケジュールはありません
+        <div className="mb-8 rounded-2xl border border-ink-700 bg-ink-700/30 p-6 text-center text-sm text-ink-300">
+          今日（{['日', '月', '火', '水', '木', '金', '土'][wd]}曜）のスケジュールはありません
         </div>
       )}
+
+      <section className="mb-8">
+        <MiniCalendar refreshKey={logs.length} />
+      </section>
     </div>
   )
 }

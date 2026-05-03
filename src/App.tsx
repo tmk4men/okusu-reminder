@@ -6,7 +6,7 @@ import { Today } from './components/Today'
 import { Medications } from './components/Medications'
 import { Settings } from './components/Settings'
 import { db } from './db/schema'
-import { rescheduleToday } from './lib/notify'
+import { rescheduleToday, snoozeSchedule } from './lib/notify'
 import { todayKey } from './lib/date'
 
 export type Tab = 'today' | 'meds' | 'settings'
@@ -18,14 +18,16 @@ export default function App() {
   const schedules = useLiveQuery(() => db.schedules.toArray())
   const settings = useLiveQuery(() => db.settings.toArray())
   const todayLogs = useLiveQuery(() => db.logs.where('date').equals(todayKey()).toArray())
+  const snoozes = useLiveQuery(() => db.snoozes.toArray())
 
   useEffect(() => {
     rescheduleToday()
-  }, [meds, schedules, settings, todayLogs])
+  }, [meds, schedules, settings, todayLogs, snoozes])
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const take = params.get('take')
+    const later = params.get('later')
     if (take) {
       db.logs.add({
         scheduleId: Number(take),
@@ -33,8 +35,11 @@ export default function App() {
         status: 'taken',
         recordedAt: Date.now(),
       })
-      history.replaceState({}, '', '/')
     }
+    if (later) {
+      snoozeSchedule(Number(later))
+    }
+    if (take || later) history.replaceState({}, '', '/')
   }, [])
 
   useEffect(() => {
@@ -43,13 +48,16 @@ export default function App() {
       const msg = e.data
       if (msg?.type !== 'notification-action') return
       const { action, data } = msg
-      if (action === 'taken' && data?.scheduleId) {
+      if (!data?.scheduleId) return
+      if (action === 'taken') {
         db.logs.add({
           scheduleId: data.scheduleId,
           date: data.dateKey || todayKey(),
           status: 'taken',
           recordedAt: Date.now(),
         })
+      } else if (action === 'later') {
+        snoozeSchedule(data.scheduleId)
       }
     }
     navigator.serviceWorker.addEventListener('message', handler)
