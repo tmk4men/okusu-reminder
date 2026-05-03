@@ -71,9 +71,8 @@ export function MenuDrawer({ onClose, onOpenHowTo, onOpenJourney }: Props) {
 
         <div className="absolute inset-x-0 bottom-0 border-t border-ink-700 px-5 py-4 text-center text-xs text-ink-400">
           <p className="inline-flex items-center gap-1">
-            <Heart size={12} /> おくすリマインダー v0.4
+            <Heart size={12} /> おくすリマインダー
           </p>
-          <p className="mt-1">by tmk4men</p>
         </div>
       </motion.aside>
     </motion.div>
