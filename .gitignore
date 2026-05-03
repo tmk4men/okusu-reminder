@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local-only assets (raw GPT-generated character images, etc.)
+画像/
+scripts/
