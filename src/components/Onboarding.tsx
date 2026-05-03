@@ -7,6 +7,7 @@ import { vibrate } from '../lib/haptic'
 import {
   notificationPermission,
   requestNotificationPermission,
+  type PermState,
 } from '../lib/notify'
 import { DEFAULT_MEAL_TIMES, type MealTimes } from '../db/types'
 import { getMealTimes, setMealTimes } from '../lib/storage'
@@ -198,11 +199,11 @@ function DemoCard({
 }
 
 function SlideSetup() {
-  const [perm, setPerm] = useState<NotificationPermission | 'unsupported'>('default')
+  const [perm, setPerm] = useState<PermState>('default')
   const [meals, setMealsState] = useState<MealTimes>(DEFAULT_MEAL_TIMES)
 
   useEffect(() => {
-    setPerm(notificationPermission())
+    notificationPermission().then(setPerm)
     getMealTimes().then(setMealsState)
   }, [])
 

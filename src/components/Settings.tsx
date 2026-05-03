@@ -7,6 +7,7 @@ import {
   requestNotificationPermission,
   showTestNotification,
   rescheduleToday,
+  type PermState,
 } from '../lib/notify'
 
 const ROWS: { key: keyof MealTimes; label: string; Icon: typeof Sun }[] = [
@@ -15,16 +16,14 @@ const ROWS: { key: keyof MealTimes; label: string; Icon: typeof Sun }[] = [
   { key: 'dinner', label: '夕食', Icon: Moon },
 ]
 
-type Perm = NotificationPermission | 'unsupported'
-
 export function Settings() {
   const [meals, setMeals] = useState<MealTimes>(DEFAULT_MEAL_TIMES)
   const [saved, setSaved] = useState(false)
-  const [perm, setPerm] = useState<Perm>('default')
+  const [perm, setPerm] = useState<PermState>('default')
 
   useEffect(() => {
     getMealTimes().then(setMeals)
-    setPerm(notificationPermission())
+    notificationPermission().then(setPerm)
   }, [])
 
   async function update(key: keyof MealTimes, time: string) {

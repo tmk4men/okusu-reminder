@@ -7,7 +7,7 @@ import { Medications } from './components/Medications'
 import { Settings } from './components/Settings'
 import { Onboarding, isOnboarded } from './components/Onboarding'
 import { db } from './db/schema'
-import { rescheduleToday, snoozeSchedule } from './lib/notify'
+import { rescheduleToday, snoozeSchedule, setupNotificationActions } from './lib/notify'
 import { todayKey } from './lib/date'
 
 export type Tab = 'today' | 'meds' | 'settings'
@@ -21,6 +21,10 @@ export default function App() {
   const settings = useLiveQuery(() => db.settings.toArray())
   const todayLogs = useLiveQuery(() => db.logs.where('date').equals(todayKey()).toArray())
   const snoozes = useLiveQuery(() => db.snoozes.toArray())
+
+  useEffect(() => {
+    setupNotificationActions().catch(() => {})
+  }, [])
 
   useEffect(() => {
     rescheduleToday()
