@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#faf3e3" />
+  <title>プライバシーポリシー｜おくすリマインダー</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <style>
+    :root {
+      --bg: #faf3e3;
+      --card: #ffffff;
+      --border: #ebdfc6;
+      --text: #2a221b;
+      --text-soft: #5a4838;
+      --text-muted: #877360;
+      --accent: #10b981;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+    body {
+      font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.8;
+      letter-spacing: 0.01em;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+    header {
+      margin-bottom: 32px;
+    }
+    .crumb {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .crumb a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    h1 {
+      font-size: 28px;
+      margin: 0 0 8px;
+      letter-spacing: -0.01em;
+    }
+    .updated {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    main {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 32px 28px;
+    }
+    h2 {
+      font-size: 17px;
+      margin: 28px 0 8px;
+      color: var(--text);
+    }
+    h2:first-child { margin-top: 0; }
+    p, li {
+      font-size: 15px;
+      color: var(--text-soft);
+    }
+    ul { padding-left: 1.2em; }
+    li { margin: 4px 0; }
+    a { color: var(--accent); }
+    .note {
+      background: #f7efde;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 14px;
+      color: var(--text-soft);
+      margin: 18px 0;
+    }
+    footer {
+      margin-top: 32px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="crumb"><a href="/">← おくすリマインダーに戻る</a></div>
+      <h1>プライバシーポリシー</h1>
+      <p class="updated">最終更新日：2026年5月3日</p>
+    </header>
+
+    <main>
+      <h2>はじめに</h2>
+      <p>
+        本ポリシーは、「おくすリマインダー」（以下「本アプリ」といいます）における、利用者情報の取り扱いについて定めるものです。
+        本アプリは、利用者のプライバシーを最大限尊重し、必要最小限の情報のみを取り扱います。
+      </p>
+
+      <h2>1. 開発者情報</h2>
+      <ul>
+        <li>名称：tmk4men（個人開発者）</li>
+        <li>連絡先：本ページ末尾に記載のメールアドレス</li>
+      </ul>
+
+      <h2>2. 取得しない情報</h2>
+      <p>本アプリは、利用者から以下の情報を一切取得しません。</p>
+      <ul>
+        <li>氏名・生年月日・住所・電話番号などの個人情報</li>
+        <li>メールアドレス・アカウント情報（ログイン機能はありません）</li>
+        <li>位置情報・連絡先・カメラ・マイクなどの端末データ</li>
+        <li>アプリの操作履歴・利用統計</li>
+        <li>広告配信に関するトラッキング情報</li>
+      </ul>
+
+      <h2>3. 端末内にのみ保存される情報</h2>
+      <p>
+        本アプリは、利用者がアプリ内で入力・記録した以下の情報を、利用者の端末内（IndexedDB／OSローカルストレージ）に保存します。
+      </p>
+      <ul>
+        <li>登録したおくすり・サプリの名称、用量、色</li>
+        <li>服薬スケジュール（時刻、曜日、食事相対の設定）</li>
+        <li>服薬記録（日付・時刻・状態）</li>
+        <li>食事時刻などの設定</li>
+        <li>キャラクターの育成状況・バッジの達成状況</li>
+      </ul>
+      <div class="note">
+        これらの情報は本アプリの動作のためのみに利用され、外部サーバーには一切送信されません。
+        利用者の端末内に閉じて保存されます。
+      </div>
+
+      <h2>4. 通知の利用</h2>
+      <p>
+        本アプリは、利用者が通知を許可した場合に限り、端末のローカル通知機能を用いて服薬時刻のお知らせを表示します。
+        通知の発火は端末内で完結し、外部送信は行いません。
+      </p>
+
+      <h2>5. アクセス権限</h2>
+      <p>本アプリは Android において以下の権限を使用します。</p>
+      <ul>
+        <li>通知の表示：服薬リマインダーのため</li>
+        <li>バイブレーション：通知時の触覚フィードバックのため</li>
+        <li>起動時自動再開：端末再起動後も通知を維持するため</li>
+      </ul>
+      <p>
+        いずれの権限も、本アプリの基本機能のために必要な範囲でのみ使用し、他の目的には用いません。
+      </p>
+
+      <h2>6. 第三者提供・データ売買</h2>
+      <p>
+        本アプリは、利用者のいかなる情報も第三者に提供・販売することはありません。
+        広告 SDK・解析 SDK・第三者トラッキングは一切組み込まれていません。
+      </p>
+
+      <h2>7. データの削除</h2>
+      <p>利用者はいつでもご自身のデータを削除できます。</p>
+      <ul>
+        <li>アプリのアンインストール（端末内データはすべて削除されます）</li>
+        <li>Web 版の場合：ブラウザのサイトデータ削除</li>
+        <li>個別の薬・記録は、アプリ内 UI から削除可能</li>
+      </ul>
+
+      <h2>8. 子どもの利用について</h2>
+      <p>
+        本アプリは 13 歳未満の方単独での利用を想定していません。
+        13 歳未満の方が利用される場合は、保護者の同意・管理のもとでご利用ください。
+      </p>
+
+      <h2>9. 医療に関する免責</h2>
+      <p>
+        本アプリは、おくすり・サプリの服用記録および服薬リマインドを支援するツールであり、医療行為・診断・処方判断を行うものではありません。
+        服薬の判断、症状や副作用に関するご相談は、必ず医師・薬剤師等の医療専門家にお願いいたします。
+        本アプリの利用に起因するいかなる損害についても、開発者は責任を負いません。
+      </p>
+
+      <h2>10. ポリシーの変更</h2>
+      <p>
+        本ポリシーは、必要に応じて変更されることがあります。
+        変更後の内容は本ページに掲載した時点で効力を生じます。重要な変更については、本アプリ内またはリポジトリにて告知します。
+      </p>
+
+      <h2>11. お問い合わせ</h2>
+      <p>
+        本ポリシーまたは本アプリに関するお問い合わせは、開発者まで以下のメールアドレスにてご連絡ください。
+      </p>
+      <p>
+        <strong>連絡先：</strong> <a href="mailto:andoumizuki1209@gmail.com">andoumizuki1209@gmail.com</a>
+      </p>
+    </main>
+
+    <footer>
+      © tmk4men ｜ おくすリマインダー
+    </footer>
+  </div>
+</body>
+</html>

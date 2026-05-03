@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { BookOpen, Heart, X, Sparkles } from 'lucide-react'
+import { BookOpen, Heart, X, Sparkles, Shield } from 'lucide-react'
 
 interface Props {
   onClose: () => void
@@ -55,6 +55,17 @@ export function MenuDrawer({ onClose, onOpenHowTo, onOpenJourney }: Props) {
               <BookOpen size={18} className="text-mint-500" />
               <span>使い方</span>
             </button>
+          </li>
+          <li>
+            <a
+              href="https://okusu-reminder.vercel.app/privacy.html"
+              target="_blank"
+              rel="noreferrer"
+              className="flex w-full items-center gap-3 px-5 py-4 text-left text-ink-100 active:bg-ink-700"
+            >
+              <Shield size={18} className="text-ink-300" />
+              <span>プライバシーポリシー</span>
+            </a>
           </li>
         </ul>
 
