@@ -1,5 +1,5 @@
-import type { Schedule, MealTimes, Meal } from '../db/types'
-import { timeToMinutes, minutesToTime } from './date'
+import type { Medication, Schedule, MealTimes, Meal } from '../db/types'
+import { timeToMinutes, minutesToTime, todayKey } from './date'
 
 const MEAL_LABEL: Record<Meal, string> = {
   breakfast: '朝食',
@@ -36,4 +36,15 @@ export function describeSchedule(s: Schedule): string {
 
 export function isToday(s: Schedule, weekday: number): boolean {
   return s.enabled && s.days.includes(weekday as 0 | 1 | 2 | 3 | 4 | 5 | 6)
+}
+
+export function isMedActiveOn(med: Medication, dateKey = todayKey()): boolean {
+  if (med.startDate && dateKey < med.startDate) return false
+  if (med.endDate && dateKey > med.endDate) return false
+  return true
+}
+
+export function describePeriod(med: Medication): string | null {
+  if (!med.endDate) return null
+  return `〜${med.endDate.replace(/^\d{4}-/, '').replace('-', '/')}まで`
 }

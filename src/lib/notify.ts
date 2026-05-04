@@ -3,7 +3,7 @@ import { db } from '../db/schema'
 import type { Medication, Schedule, MealTimes } from '../db/types'
 import { DEFAULT_MEAL_TIMES } from '../db/types'
 import { todayKey, nowMinutes, todayWeekday } from './date'
-import { isToday, scheduledMinutes } from './schedule'
+import { isToday, isMedActiveOn, scheduledMinutes } from './schedule'
 import { isNative } from './platform'
 
 export const SNOOZE_MINUTES = 10
@@ -129,6 +129,7 @@ export async function rescheduleToday(): Promise<void> {
     if (takenIds.has(s.id!)) continue
     const med = medMap.get(s.medicationId)
     if (!med || med.archived) continue
+    if (!isMedActiveOn(med, todayKey())) continue
 
     const snoozeUntil = snoozeMap.get(s.id!)
     let fireAt: number

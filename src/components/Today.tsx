@@ -6,7 +6,7 @@ import { db } from '../db/schema'
 import type { Medication, Schedule, DoseLog, MealTimes } from '../db/types'
 import { DEFAULT_MEAL_TIMES } from '../db/types'
 import { todayKey, todayWeekday, nowMinutes } from '../lib/date'
-import { describeSchedule, isToday, scheduledMinutes, scheduledTimeStr } from '../lib/schedule'
+import { describeSchedule, isToday, isMedActiveOn, scheduledMinutes, scheduledTimeStr } from '../lib/schedule'
 import { computeStreak, type StreakInfo } from '../lib/streak'
 import { snoozeSchedule, SNOOZE_MINUTES } from '../lib/notify'
 import { vibrate } from '../lib/haptic'
@@ -53,6 +53,7 @@ export function Today() {
       if (!isToday(s, wd)) continue
       const med = medMap.get(s.medicationId)
       if (!med || med.archived) continue
+      if (!isMedActiveOn(med, dateKey)) continue
       result.push({
         schedule: s,
         med,

@@ -23,6 +23,13 @@ export class OkusuDB extends Dexie {
       settings: 'key',
       snoozes: '&scheduleId, until',
     })
+    this.version(3).stores({
+      medications: '++id, archived, createdAt, endDate',
+      schedules: '++id, medicationId, enabled',
+      logs: '++id, scheduleId, date, [scheduleId+date]',
+      settings: 'key',
+      snoozes: '&scheduleId, until',
+    })
   }
 }
 

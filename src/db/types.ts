@@ -9,6 +9,8 @@ export interface Medication {
   color: string
   archived: boolean
   createdAt: number
+  startDate?: string
+  endDate?: string | null
 }
 
 export interface Schedule {

@@ -4,6 +4,7 @@ import { Plus, Trash2, X, Check } from 'lucide-react'
 import { db } from '../db/schema'
 import { MED_COLORS } from '../db/types'
 import type { Medication, Schedule, Weekday, Meal } from '../db/types'
+import { todayKey } from '../lib/date'
 
 const DAYS: { v: Weekday; label: string }[] = [
   { v: 0, label: '日' },
@@ -33,6 +34,39 @@ interface DraftSchedule {
   enabled: boolean
 }
 
+type PeriodMode = 'indefinite' | 'limited'
+type PeriodUnit = 'days' | 'weeks'
+
+function diffDaysInclusive(start: string, end: string): number {
+  const a = new Date(start + 'T00:00:00')
+  const b = new Date(end + 'T00:00:00')
+  return Math.round((b.getTime() - a.getTime()) / 86400000) + 1
+}
+
+function addDaysKey(start: string, days: number): string {
+  const d = new Date(start + 'T00:00:00')
+  d.setDate(d.getDate() + days)
+  return todayKey(d)
+}
+
+function inferPeriod(med?: Medication): {
+  mode: PeriodMode
+  startDate: string
+  value: number
+  unit: PeriodUnit
+} {
+  const today = todayKey()
+  if (!med || !med.endDate) {
+    return { mode: 'indefinite', startDate: med?.startDate ?? today, value: 7, unit: 'days' }
+  }
+  const start = med.startDate ?? today
+  const days = Math.max(1, diffDaysInclusive(start, med.endDate))
+  if (days % 7 === 0) {
+    return { mode: 'limited', startDate: start, value: days / 7, unit: 'weeks' }
+  }
+  return { mode: 'limited', startDate: start, value: days, unit: 'days' }
+}
+
 function toDraft(s?: Schedule): DraftSchedule {
   return {
     id: s?.id,
@@ -53,6 +87,11 @@ export function MedicationForm({ med, schedules = [], onClose }: Props) {
   const [drafts, setDrafts] = useState<DraftSchedule[]>(
     schedules.length > 0 ? schedules.map(toDraft) : [toDraft()],
   )
+  const initialPeriod = inferPeriod(med)
+  const [periodMode, setPeriodMode] = useState<PeriodMode>(initialPeriod.mode)
+  const [periodStart, setPeriodStart] = useState<string>(initialPeriod.startDate)
+  const [periodValue, setPeriodValue] = useState<number>(initialPeriod.value)
+  const [periodUnit, setPeriodUnit] = useState<PeriodUnit>(initialPeriod.unit)
 
   function updateDraft(idx: number, patch: Partial<DraftSchedule>) {
     setDrafts((d) => d.map((s, i) => (i === idx ? { ...s, ...patch } : s)))
@@ -72,9 +111,22 @@ export function MedicationForm({ med, schedules = [], onClose }: Props) {
 
   async function save() {
     if (!name.trim()) return
+    const start = periodStart || todayKey()
+    const totalDays =
+      periodMode === 'limited'
+        ? Math.max(1, Math.floor(periodValue || 0)) * (periodUnit === 'weeks' ? 7 : 1)
+        : 0
+    const endDate =
+      periodMode === 'limited' && totalDays > 0 ? addDaysKey(start, totalDays - 1) : null
     let medId = med?.id
     if (isEdit && medId) {
-      await db.medications.update(medId, { name: name.trim(), dose: dose.trim(), color })
+      await db.medications.update(medId, {
+        name: name.trim(),
+        dose: dose.trim(),
+        color,
+        startDate: start,
+        endDate,
+      })
     } else {
       medId = await db.medications.add({
         name: name.trim(),
@@ -82,6 +134,8 @@ export function MedicationForm({ med, schedules = [], onClose }: Props) {
         color,
         archived: false,
         createdAt: Date.now(),
+        startDate: start,
+        endDate,
       })
     }
 
@@ -180,6 +234,63 @@ export function MedicationForm({ med, schedules = [], onClose }: Props) {
                   )}
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs text-ink-400">服薬期間</label>
+            <div className="space-y-3 rounded-2xl border border-ink-700 bg-ink-900/60 p-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={periodUnit === 'weeks' ? 52 : 365}
+                  value={periodValue}
+                  disabled={periodMode === 'indefinite'}
+                  onChange={(e) =>
+                    setPeriodValue(Math.max(1, Number(e.target.value) || 1))
+                  }
+                  className="w-20 rounded-xl border border-ink-700 bg-ink-900 px-3 py-3 text-center text-lg tabular-nums text-ink-50 outline-none focus:border-mint-400 disabled:opacity-40"
+                />
+                <select
+                  value={periodMode === 'indefinite' ? 'indefinite' : periodUnit}
+                  onChange={(e) => {
+                    const v = e.target.value
+                    if (v === 'indefinite') {
+                      setPeriodMode('indefinite')
+                    } else {
+                      setPeriodMode('limited')
+                      setPeriodUnit(v as PeriodUnit)
+                    }
+                  }}
+                  className="flex-1 rounded-xl border border-ink-700 bg-ink-900 px-3 py-3 text-ink-50 outline-none focus:border-mint-400"
+                >
+                  <option value="days">日間</option>
+                  <option value="weeks">週間</option>
+                  <option value="indefinite">無期限</option>
+                </select>
+              </div>
+              {periodMode === 'limited' && (
+                <div className="flex items-center gap-2">
+                  <label className="shrink-0 text-xs text-ink-400">開始日</label>
+                  <input
+                    type="date"
+                    value={periodStart}
+                    onChange={(e) => setPeriodStart(e.target.value || todayKey())}
+                    className="flex-1 rounded-xl border border-ink-700 bg-ink-900 px-3 py-2 text-ink-50 outline-none focus:border-mint-400"
+                  />
+                  <span className="shrink-0 text-xs text-ink-400">
+                    〜{' '}
+                    {addDaysKey(
+                      periodStart || todayKey(),
+                      Math.max(1, Math.floor(periodValue || 1)) *
+                        (periodUnit === 'weeks' ? 7 : 1) -
+                        1,
+                    )}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 

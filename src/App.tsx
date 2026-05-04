@@ -12,9 +12,23 @@ import { todayKey } from './lib/date'
 
 export type Tab = 'today' | 'meds' | 'settings'
 
+const TAB_ORDER: Tab[] = ['today', 'meds', 'settings']
+
+const tabVariants = {
+  enter: (d: number) => ({ opacity: 0, x: d === 0 ? 0 : d * 24 }),
+  center: { opacity: 1, x: 0 },
+  exit: (d: number) => ({ opacity: 0, x: d === 0 ? 0 : d * -24 }),
+}
+
 export default function App() {
   const [tab, setTab] = useState<Tab>('today')
+  const [direction, setDirection] = useState(0)
   const [onboarding, setOnboarding] = useState(() => !isOnboarded())
+
+  function changeTab(next: Tab) {
+    setDirection(Math.sign(TAB_ORDER.indexOf(next) - TAB_ORDER.indexOf(tab)))
+    setTab(next)
+  }
 
   const meds = useLiveQuery(() => db.medications.toArray())
   const schedules = useLiveQuery(() => db.schedules.toArray())
@@ -80,13 +94,15 @@ export default function App() {
 
   return (
     <>
-      <Layout active={tab} onChange={setTab}>
-        <AnimatePresence mode="wait">
+      <Layout active={tab} onChange={changeTab}>
+        <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={tab}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
+            custom={direction}
+            variants={tabVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
             transition={{ duration: 0.18 }}
           >
             {tab === 'today' && <Today />}

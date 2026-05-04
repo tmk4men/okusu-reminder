@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, type PanInfo } from 'framer-motion'
 import { CalendarCheck, Pill, Settings as SettingsIcon, Menu as MenuIcon } from 'lucide-react'
 import type { Tab } from '../App'
 import { MenuDrawer } from './MenuDrawer'
@@ -19,6 +19,9 @@ const TABS: { id: Tab; label: string; Icon: typeof Pill }[] = [
   { id: 'settings', label: '設定', Icon: SettingsIcon },
 ]
 
+const SWIPE_DIST = 60
+const SWIPE_VELOCITY = 350
+
 export function Layout({ active, onChange, children }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [howToOpen, setHowToOpen] = useState(false)
@@ -29,6 +32,24 @@ export function Layout({ active, onChange, children }: Props) {
     window.addEventListener('open-journey', open)
     return () => window.removeEventListener('open-journey', open)
   }, [])
+
+  function shiftTab(direction: 1 | -1) {
+    const idx = TABS.findIndex((t) => t.id === active)
+    const next = TABS[idx + direction]
+    if (next) onChange(next.id)
+  }
+
+  function handlePanEnd(_: unknown, info: PanInfo) {
+    const dx = info.offset.x
+    const dy = info.offset.y
+    const vx = info.velocity.x
+    if (Math.abs(dx) < Math.abs(dy) * 1.2) return
+    const passDistance = Math.abs(dx) > SWIPE_DIST
+    const passVelocity = Math.abs(vx) > SWIPE_VELOCITY
+    if (!passDistance && !passVelocity) return
+    if (dx < 0) shiftTab(1)
+    else shiftTab(-1)
+  }
 
   return (
     <div className="relative mx-auto flex h-full max-w-md flex-col bg-ink-900">
@@ -41,7 +62,12 @@ export function Layout({ active, onChange, children }: Props) {
         <MenuIcon size={20} />
       </button>
 
-      <main className="flex-1 overflow-y-auto pb-24">{children}</main>
+      <motion.main
+        className="flex-1 touch-pan-y overflow-y-auto pb-24"
+        onPanEnd={handlePanEnd}
+      >
+        {children}
+      </motion.main>
 
       <FloatingCharacter />
 

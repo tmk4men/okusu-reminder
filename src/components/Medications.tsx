@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Plus, Pill } from 'lucide-react'
 import { db } from '../db/schema'
 import type { Medication, Schedule } from '../db/types'
-import { describeSchedule } from '../lib/schedule'
+import { describeSchedule, describePeriod, isMedActiveOn } from '../lib/schedule'
 import { MedicationForm } from './MedicationForm'
 
 export function Medications() {
@@ -46,21 +46,33 @@ export function Medications() {
         <ul className="space-y-3">
           {active.map((m) => {
             const ss = schedMap.get(m.id!) ?? []
+            const period = describePeriod(m)
+            const ended = !isMedActiveOn(m)
             return (
               <li key={m.id}>
                 <button
                   onClick={() => setEditing({ med: m, open: true })}
-                  className="flex w-full items-center gap-3 rounded-2xl border border-ink-700 bg-ink-800 p-4 text-left transition-transform active:scale-[0.99]"
+                  className={`flex w-full items-center gap-3 rounded-2xl border border-ink-700 bg-ink-800 p-4 text-left transition-transform active:scale-[0.99] ${
+                    ended ? 'opacity-50' : ''
+                  }`}
                 >
                   <span
                     className="block h-12 w-1.5 shrink-0 rounded-full"
                     style={{ background: m.color }}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-ink-50">{m.name}</p>
+                    <p className="truncate font-medium text-ink-50">
+                      {m.name}
+                      {ended && (
+                        <span className="ml-2 rounded-full bg-ink-700 px-2 py-0.5 align-middle text-[10px] text-ink-300">
+                          期間終了
+                        </span>
+                      )}
+                    </p>
                     <p className="text-xs text-ink-300">
                       {m.dose}
                       {ss.length > 0 && ' ・ ' + ss.map((s) => describeSchedule(s)).join(' / ')}
+                      {period && <span className="ml-1 text-ink-400">・ {period}</span>}
                     </p>
                   </div>
                 </button>
