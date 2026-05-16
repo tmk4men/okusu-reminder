@@ -11,6 +11,7 @@ import { computeStreak, type StreakInfo } from '../lib/streak'
 import { snoozeSchedule, SNOOZE_MINUTES } from '../lib/notify'
 import { vibrate } from '../lib/haptic'
 import { pop, celebrateAllDone } from '../lib/celebrate'
+import { updateWidget } from '../lib/widget'
 import { StreakBadge } from './StreakBadge'
 import { MiniCalendar } from './HistoryCalendar'
 
@@ -83,6 +84,17 @@ export function Today() {
     }
     prevPending.current = pending.length
   }, [pending.length, items.length])
+
+  // Android ホームウィジェットへ今日の進捗を反映
+  useEffect(() => {
+    const total = items.length
+    const taken = done.length
+    let message: string | undefined
+    if (total === 0) message = 'お薬を登録してね'
+    else if (taken >= total) message = '今日もばっちり！'
+    else message = `あと ${total - taken} 個`
+    updateWidget({ total, taken, message })
+  }, [items.length, done.length])
 
   const greeting = useMemo(() => {
     const h = new Date().getHours()

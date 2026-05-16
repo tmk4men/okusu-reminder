@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor-community/admob": "^8.0.0",
     "@capacitor/android": "^8.3.1",
     "@capacitor/app": "^8.1.0",
     "@capacitor/core": "^8.3.1",
@@ -17,6 +18,7 @@
     "@capacitor/local-notifications": "^8.0.2",
     "@capacitor/splash-screen": "^8.0.1",
     "@capacitor/status-bar": "^8.0.2",
+    "@capgo/native-purchases": "^8.3.10",
     "canvas-confetti": "^1.9.4",
     "date-fns": "^4.1.0",
     "dexie": "^4.4.2",

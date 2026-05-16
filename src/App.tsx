@@ -9,6 +9,7 @@ import { Onboarding, isOnboarded } from './components/Onboarding'
 import { db } from './db/schema'
 import { rescheduleToday, snoozeSchedule, setupNotificationActions } from './lib/notify'
 import { todayKey } from './lib/date'
+import { verifyPremiumOnLaunch } from './lib/billing'
 
 export type Tab = 'today' | 'meds' | 'settings'
 
@@ -38,6 +39,7 @@ export default function App() {
 
   useEffect(() => {
     setupNotificationActions().catch(() => {})
+    verifyPremiumOnLaunch()
   }, [])
 
   useEffect(() => {

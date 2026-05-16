@@ -1,16 +1,20 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Plus, Pill } from 'lucide-react'
+import { Plus, Pill, Lock } from 'lucide-react'
 import { db } from '../db/schema'
 import type { Medication, Schedule } from '../db/types'
 import { describeSchedule, describePeriod, isMedActiveOn } from '../lib/schedule'
+import { FREE_MED_LIMIT, usePremium } from '../lib/premium'
 import { MedicationForm } from './MedicationForm'
+import { PremiumModal } from './PremiumModal'
 
 export function Medications() {
   const meds = useLiveQuery(() => db.medications.toArray()) ?? []
   const schedules = useLiveQuery(() => db.schedules.toArray()) ?? []
+  const premium = usePremium()
   const [editing, setEditing] = useState<{ med?: Medication; open: boolean }>({ open: false })
+  const [showPremium, setShowPremium] = useState(false)
 
   const active = meds.filter((m) => !m.archived)
   const schedMap = new Map<number, Schedule[]>()
@@ -20,17 +24,38 @@ export function Medications() {
     schedMap.set(s.medicationId, arr)
   }
 
+  const reachedLimit = !premium && active.length >= FREE_MED_LIMIT
+
+  function handleAdd() {
+    if (reachedLimit) {
+      setShowPremium(true)
+      return
+    }
+    setEditing({ open: true })
+  }
+
   return (
     <div className="px-5 pt-16">
       <header className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-semibold tracking-tight text-ink-50">おくすり</h1>
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight text-ink-50">おくすり</h1>
+          {!premium && (
+            <p className="mt-1 text-xs text-ink-400">
+              無料版 {active.length} / {FREE_MED_LIMIT} 個
+            </p>
+          )}
+        </div>
         <motion.button
           whileTap={{ scale: 0.92 }}
-          onClick={() => setEditing({ open: true })}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-mint-400 text-ink-50 shadow-lg shadow-mint-500/20"
-          aria-label="追加"
+          onClick={handleAdd}
+          className={`inline-flex h-11 w-11 items-center justify-center rounded-full text-ink-50 shadow-lg ${
+            reachedLimit
+              ? 'bg-ink-700 shadow-ink-900/40'
+              : 'bg-mint-400 shadow-mint-500/20'
+          }`}
+          aria-label={reachedLimit ? 'プレミアムで解放' : '追加'}
         >
-          <Plus size={22} strokeWidth={2.6} />
+          {reachedLimit ? <Lock size={20} strokeWidth={2.4} /> : <Plus size={22} strokeWidth={2.6} />}
         </motion.button>
       </header>
 
@@ -82,6 +107,26 @@ export function Medications() {
         </ul>
       )}
 
+      {reachedLimit && (
+        <button
+          onClick={() => setShowPremium(true)}
+          className="mt-6 flex w-full items-center justify-between rounded-2xl border border-mint-400/30 bg-mint-400/10 px-4 py-3 text-left"
+        >
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-mint-400/20 text-mint-300">
+              <Lock size={16} />
+            </span>
+            <div>
+              <p className="text-sm font-medium text-ink-50">登録枠がいっぱいです</p>
+              <p className="text-xs text-ink-300">プレミアムで無制限に登録 ・ 広告も非表示</p>
+            </div>
+          </div>
+          <span className="rounded-full bg-mint-400 px-3 py-1 text-xs font-medium text-ink-50">
+            ¥480
+          </span>
+        </button>
+      )}
+
       <AnimatePresence>
         {editing.open && (
           <MedicationForm
@@ -89,6 +134,9 @@ export function Medications() {
             schedules={editing.med ? schedMap.get(editing.med.id!) : []}
             onClose={() => setEditing({ open: false })}
           />
+        )}
+        {showPremium && (
+          <PremiumModal reason="limit" onClose={() => setShowPremium(false)} />
         )}
       </AnimatePresence>
     </div>

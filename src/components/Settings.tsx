@@ -1,5 +1,17 @@
 import { useEffect, useState } from 'react'
-import { Sunrise, Sun, Moon, Heart, Bell, BellOff, BellRing, AlertTriangle } from 'lucide-react'
+import { AnimatePresence } from 'framer-motion'
+import {
+  Sunrise,
+  Sun,
+  Moon,
+  Heart,
+  Bell,
+  BellOff,
+  BellRing,
+  AlertTriangle,
+  Crown,
+  Sparkles,
+} from 'lucide-react'
 import { DEFAULT_MEAL_TIMES, type MealTimes } from '../db/types'
 import { getMealTimes, setMealTimes } from '../lib/storage'
 import {
@@ -9,6 +21,8 @@ import {
   rescheduleToday,
   type PermState,
 } from '../lib/notify'
+import { usePremium, setPremium } from '../lib/premium'
+import { PremiumModal } from './PremiumModal'
 
 const ROWS: { key: keyof MealTimes; label: string; Icon: typeof Sun }[] = [
   { key: 'breakfast', label: '朝食', Icon: Sunrise },
@@ -20,6 +34,8 @@ export function Settings() {
   const [meals, setMeals] = useState<MealTimes>(DEFAULT_MEAL_TIMES)
   const [saved, setSaved] = useState(false)
   const [perm, setPerm] = useState<PermState>('default')
+  const [showPremium, setShowPremium] = useState(false)
+  const premium = usePremium()
 
   useEffect(() => {
     getMealTimes().then(setMeals)
@@ -47,6 +63,46 @@ export function Settings() {
       <header className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight text-ink-50">設定</h1>
       </header>
+
+      <section className="mb-8 space-y-3">
+        <h2 className="px-1 text-xs font-medium uppercase tracking-widest text-ink-400">
+          プレミアム
+        </h2>
+        {premium ? (
+          <div className="overflow-hidden rounded-2xl border border-mint-400/40 bg-mint-400/10">
+            <div className="flex items-center gap-3 px-4 py-4">
+              <Crown size={20} className="text-mint-300" />
+              <div className="flex-1">
+                <p className="text-ink-100">プレミアム会員です</p>
+                <p className="mt-0.5 text-xs text-ink-300">
+                  おくすり無制限・広告非表示。いつもありがとう
+                </p>
+              </div>
+            </div>
+            {import.meta.env.DEV && (
+              <button
+                onClick={() => setPremium(false)}
+                className="block w-full border-t border-mint-400/20 px-4 py-3 text-left text-xs text-ink-400 active:bg-ink-700"
+              >
+                [DEV] プレミアムを解除
+              </button>
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowPremium(true)}
+            className="flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-ink-700 bg-ink-800 px-4 py-4 text-left active:bg-ink-700"
+          >
+            <Sparkles size={20} className="text-mint-400" />
+            <div className="flex-1">
+              <p className="text-ink-100">プレミアムにアップグレード</p>
+              <p className="mt-0.5 text-xs text-ink-400">
+                おくすり無制限 ・ 広告非表示 ・ ¥480 買い切り
+              </p>
+            </div>
+          </button>
+        )}
+      </section>
 
       <section className="mb-8 space-y-3">
         <h2 className="px-1 text-xs font-medium uppercase tracking-widest text-ink-400">
@@ -150,6 +206,12 @@ export function Settings() {
           <Heart size={12} /> おくすリマインダー
         </p>
       </footer>
+
+      <AnimatePresence>
+        {showPremium && (
+          <PremiumModal onClose={() => setShowPremium(false)} />
+        )}
+      </AnimatePresence>
     </div>
   )
 }

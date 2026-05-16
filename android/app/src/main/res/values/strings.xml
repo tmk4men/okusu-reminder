@@ -4,4 +4,8 @@
     <string name="title_activity_main">おくすリマインダー</string>
     <string name="package_name">com.tmk4men.okusureminder</string>
     <string name="custom_url_scheme">com.tmk4men.okusureminder</string>
+    <string name="widget_label">おくすリマインダー</string>
+    <string name="widget_description">今日のお薬の進捗とのんちゃんを表示</string>
+    <!-- AdMob App ID（本番） -->
+    <string name="admob_app_id">ca-app-pub-5634961953346923~7820842350</string>
 </resources>

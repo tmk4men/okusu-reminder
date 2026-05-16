@@ -6,6 +6,7 @@ import { MenuDrawer } from './MenuDrawer'
 import { HowToModal } from './HowToModal'
 import { JourneyModal } from './JourneyModal'
 import { FloatingCharacter } from './FloatingCharacter'
+import { AdBanner } from './AdBanner'
 
 interface Props {
   active: Tab
@@ -70,6 +71,8 @@ export function Layout({ active, onChange, children }: Props) {
       </motion.main>
 
       <FloatingCharacter />
+
+      <AdBanner />
 
       <nav className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-md border-t border-ink-700 bg-ink-900/95 backdrop-blur">
         <ul className="flex">
