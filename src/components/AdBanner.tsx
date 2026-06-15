@@ -1,11 +1,20 @@
-import { useEffect } from 'react'
-import { AdMob, BannerAdPosition, BannerAdSize } from '@capacitor-community/admob'
+import { useEffect, useState } from 'react'
+import {
+  AdMob,
+  BannerAdPosition,
+  BannerAdSize,
+  BannerAdPluginEvents,
+  type AdMobError,
+} from '@capacitor-community/admob'
 import { usePremium } from '../lib/premium'
 import { isNative } from '../lib/platform'
 
 // Google 公式テストバナー（Android）。本番では VITE_ADMOB_BANNER_ID を .env で上書き
 const TEST_BANNER_ID = 'ca-app-pub-3940256099942544/6300978111'
 const BANNER_ID = (import.meta.env.VITE_ADMOB_BANNER_ID as string | undefined) || TEST_BANNER_ID
+
+// VITE_ADMOB_DEBUG=1 でビルドすると、実機に広告の読み込み状況を表示して原因切り分けできる
+const DEBUG = import.meta.env.VITE_ADMOB_DEBUG === '1'
 
 let initialized = false
 async function ensureInitialized() {
@@ -18,14 +27,29 @@ async function ensureInitialized() {
 
 export function AdBanner() {
   const premium = usePremium()
+  const [status, setStatus] = useState<string>('init…')
 
   useEffect(() => {
     if (premium || !isNative()) return
     let cancelled = false
+    const handles: { remove: () => void }[] = []
+
     ;(async () => {
       try {
+        const loaded = await AdMob.addListener(BannerAdPluginEvents.Loaded, () => {
+          setStatus('loaded ✓')
+        })
+        const failed = await AdMob.addListener(
+          BannerAdPluginEvents.FailedToLoad,
+          (e: AdMobError) => {
+            setStatus(`failed code=${e.code} ${e.message ?? ''}`)
+          },
+        )
+        handles.push(loaded, failed)
+
         await ensureInitialized()
         if (cancelled) return
+        setStatus('requesting…')
         await AdMob.showBanner({
           adId: BANNER_ID,
           adSize: BannerAdSize.ADAPTIVE_BANNER,
@@ -33,14 +57,28 @@ export function AdBanner() {
           margin: 64,
         })
       } catch (e) {
+        setStatus(`showBanner error: ${String(e)}`)
         console.warn('AdMob showBanner failed', e)
       }
     })()
+
     return () => {
       cancelled = true
+      handles.forEach((h) => h.remove())
       AdMob.removeBanner().catch(() => {})
     }
   }, [premium])
+
+  // DEBUG ストリップは premium でも表示する（広告が出ない原因の切り分けのため）
+  if (DEBUG && isNative()) {
+    return (
+      <div className="pointer-events-none fixed inset-x-0 bottom-[120px] z-30 mx-auto max-w-md px-3">
+        <div className="rounded-lg border border-dashed border-amber-500/60 bg-ink-900/90 py-1.5 text-center text-[10px] tracking-wide text-amber-300">
+          AD: {premium ? 'premium → 広告非表示' : status}
+        </div>
+      </div>
+    )
+  }
 
   if (premium) return null
 

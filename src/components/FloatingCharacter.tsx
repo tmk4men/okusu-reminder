@@ -40,7 +40,8 @@ export function FloatingCharacter() {
   return (
     <div
       ref={containerRef}
-      className="pointer-events-none absolute bottom-20 inset-x-0 z-10 h-16"
+      className="pointer-events-none absolute inset-x-0 z-10 h-16"
+      style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
     >
       {w > SIZE + 8 && (
         <motion.div

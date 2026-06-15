@@ -22,6 +22,7 @@ import {
   type PermState,
 } from '../lib/notify'
 import { usePremium, setPremium } from '../lib/premium'
+import { isNative } from '../lib/platform'
 import { PremiumModal } from './PremiumModal'
 
 const ROWS: { key: keyof MealTimes; label: string; Icon: typeof Sun }[] = [
@@ -159,9 +160,11 @@ export function Settings() {
             </button>
           )}
         </div>
-        <p className="px-1 text-[11px] leading-relaxed text-ink-400">
-          ※ Web版の通知はブラウザ依存で、端末ロック中は届かない場合があります。確実な通知はAndroidアプリ版で対応予定。
-        </p>
+        {!isNative() && (
+          <p className="px-1 text-[11px] leading-relaxed text-ink-400">
+            ※ Web版の通知はブラウザ依存で、端末ロック中は届かない場合があります。確実な通知はAndroidアプリ版で対応予定。
+          </p>
+        )}
       </section>
 
       <section className="space-y-3">
