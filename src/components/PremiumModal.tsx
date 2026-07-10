@@ -102,7 +102,7 @@ export function PremiumModal({ onClose, reason = 'manual' }: Props) {
           <div className="mb-6 text-center">
             <p className="text-sm text-ink-300">一度の購入で、ずっと使える</p>
             <p className="mt-2 text-3xl font-semibold tracking-tight text-ink-50">
-              ¥480
+              ¥500
               <span className="ml-1 text-sm font-normal text-ink-300">買い切り</span>
             </p>
           </div>

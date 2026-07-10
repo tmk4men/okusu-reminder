@@ -98,7 +98,7 @@ export function Settings() {
             <div className="flex-1">
               <p className="text-ink-100">プレミアムにアップグレード</p>
               <p className="mt-0.5 text-xs text-ink-400">
-                おくすり無制限 ・ 広告非表示 ・ ¥480 買い切り
+                おくすり無制限 ・ 広告非表示 ・ ¥500 買い切り
               </p>
             </div>
           </button>
