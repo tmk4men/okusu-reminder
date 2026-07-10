@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#faf3e3" />
+  <title>サポート｜おくすリマインダー</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <style>
+    :root {
+      --bg: #faf3e3;
+      --card: #ffffff;
+      --border: #ebdfc6;
+      --text: #2a221b;
+      --text-soft: #5a4838;
+      --text-muted: #877360;
+      --accent: #10b981;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+    body {
+      font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.8;
+      letter-spacing: 0.01em;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+    header { margin-bottom: 32px; }
+    .crumb { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+    .crumb a { color: var(--accent); text-decoration: none; }
+    h1 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.01em; }
+    .updated { color: var(--text-muted); font-size: 13px; }
+    main {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 32px 28px;
+    }
+    h2 { font-size: 17px; margin: 28px 0 8px; color: var(--text); }
+    h2:first-child { margin-top: 0; }
+    p, li { font-size: 15px; color: var(--text-soft); }
+    ul { padding-left: 1.2em; }
+    li { margin: 4px 0; }
+    a { color: var(--accent); }
+    .faq-q { font-weight: 600; color: var(--text); margin: 20px 0 4px; }
+    .contact {
+      background: #f7efde;
+      border-radius: 12px;
+      padding: 18px 20px;
+      font-size: 15px;
+      color: var(--text-soft);
+      margin: 20px 0 0;
+    }
+    .contact a { font-weight: 600; }
+    footer { margin-top: 32px; text-align: center; font-size: 12px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="crumb"><a href="/">← おくすリマインダーに戻る</a></div>
+      <h1>サポート</h1>
+      <p class="updated">おくすリマインダー サポートページ</p>
+    </header>
+
+    <main>
+      <h2>よくあるご質問</h2>
+
+      <p class="faq-q">Q. 通知（リマインダー）が届きません。</p>
+      <p>
+        端末の設定でアプリの通知が許可されているかご確認ください。iPhone は「設定 &gt; 通知 &gt; おくすリマインダー」で通知をオンに、
+        また集中モード（おやすみモード）中は通知が抑制されることがあります。アプリ内でお薬ごとに時刻が設定されているかもご確認ください。
+      </p>
+
+      <p class="faq-q">Q. 機種変更・再インストールしたらデータが消えました。</p>
+      <p>
+        本アプリはプライバシー保護のため、データを端末内にのみ保存し、サーバーには送信していません。
+        そのため機種変更や再インストールでお薬の登録内容は引き継がれません。あらかじめご了承ください。
+      </p>
+
+      <p class="faq-q">Q. プレミアム（買い切り）を購入したのに反映されません／機種変更後に復元したい。</p>
+      <p>
+        アプリ内の「設定 &gt; プレミアム」から「購入を復元」をお試しください。購入時と同じ Apple ID でサインインしている必要があります。
+        それでも反映されない場合は、下記メールまでご連絡ください。
+      </p>
+
+      <p class="faq-q">Q. プレミアムでは何ができますか？</p>
+      <p>
+        無料ではお薬・サプリを3件まで登録できます。プレミアム（¥500 買い切り）にすると登録数が無制限になります。一度のご購入でずっとお使いいただけます。
+      </p>
+
+      <p class="faq-q">Q. お薬の情報はどこかに送信されますか？</p>
+      <p>
+        いいえ。入力された情報はすべてお使いの端末内にのみ保存され、外部のサーバーへ送信されることはありません。詳しくは
+        <a href="/privacy.html">プライバシーポリシー</a>をご覧ください。
+      </p>
+
+      <h2>お問い合わせ</h2>
+      <p>
+        ご不明な点・不具合のご報告・ご要望などがございましたら、以下のメールアドレスまでお気軽にご連絡ください。
+        できるだけ早くご返信いたします。
+      </p>
+      <div class="contact">
+        <strong>連絡先：</strong> <a href="mailto:andoumizuki1209@gmail.com">andoumizuki1209@gmail.com</a><br />
+        開発者：tmk4men（個人開発者）
+      </div>
+
+      <footer>
+        <a href="/privacy.html">プライバシーポリシー・利用規約</a>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

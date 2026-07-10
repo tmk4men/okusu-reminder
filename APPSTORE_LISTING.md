@@ -71,6 +71,37 @@
 
 ---
 
+## App審査に関する情報（Review Notes）
+
+### ログイン
+不要（アカウント登録なし・全データ端末内）。デモアカウントは不要です。
+
+### メモ本文（日本語）
+本アプリはお薬・サプリの飲み忘れを防ぐ服薬リマインダーです。
+
+- アカウント登録・ログインは不要です。すべてのデータは端末内（オフライン）に保存され、サーバーには送信しません。
+- リマインダーはローカル通知で実現しています。初回に通知の許可をお願いします。
+- App内課金：「プレミアム」(product ID: premium_lifetime / 非消耗型 / ¥500 買い切り) が1つあります。
+  テスト方法：お薬を3件登録すると無料枠が上限になり、4件目を追加しようとするとプレミアム購入画面が表示されます。設定画面の「プレミアム」からも購入・復元できます。復元は「購入を復元」ボタンで行えます。
+- 本バージョンでは広告（AdMob）は表示していません。
+- 本アプリは服薬の記録・管理を補助するもので、医学的な診断・治療・助言は行いません。
+
+ご確認よろしくお願いいたします。
+
+### メモ本文（English / 併記推奨）
+This app is a medication & supplement reminder that helps users avoid missed doses.
+
+- No account or login is required. All data is stored locally on the device (offline) and is never sent to any server.
+- Reminders use local notifications; please allow notifications on first launch.
+- In-app purchase: one non-consumable "Premium" (product ID: premium_lifetime, ¥500, one-time).
+  How to test: after registering 3 medications the free limit is reached; adding a 4th shows the Premium purchase screen. Purchase/Restore is also available from Settings > Premium ("Restore Purchases" button).
+- This build does not display any ads (AdMob is disabled).
+- The app assists with logging/reminding only and does not provide medical diagnosis, treatment, or advice.
+
+Thank you for the review.
+
+---
+
 ## メモ
 - **プロモーション用テキスト**は審査なしでいつでも変更可。**概要・キーワード**の変更はアプリのアップデート提出時のみ反映。
 - iOS 版は広告オフのため、プレミアムの訴求は「登録無制限」中心にしている。将来 iOS で広告を有効化したら、概要の料金欄に「広告も非表示になります」を追記する。
