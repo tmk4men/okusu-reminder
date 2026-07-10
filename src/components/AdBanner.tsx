@@ -7,11 +7,22 @@ import {
   type AdMobError,
 } from '@capacitor-community/admob'
 import { usePremium } from '../lib/premium'
-import { isNative } from '../lib/platform'
+import { isNative, platform } from '../lib/platform'
 
 // Google 公式テストバナー（Android）。本番では VITE_ADMOB_BANNER_ID を .env で上書き
 const TEST_BANNER_ID = 'ca-app-pub-3940256099942544/6300978111'
 const BANNER_ID = (import.meta.env.VITE_ADMOB_BANNER_ID as string | undefined) || TEST_BANNER_ID
+
+// iOS は広告オフでリリース開始。有効化する手順は IOS_RELEASE.md 参照
+// （iOS 用 AdMob アプリ作成 → Info.plist に GADApplicationIdentifier / SKAdNetworkItems 追加 → ここを true）
+const ADS_ENABLED_IOS = false
+
+// この端末で広告を出してよいか（iOS はフラグがオフの間は常に非表示）
+function adsAllowed(): boolean {
+  if (!isNative()) return false
+  if (platform() === 'ios' && !ADS_ENABLED_IOS) return false
+  return true
+}
 
 // VITE_ADMOB_DEBUG=1 でビルドすると、実機に広告の読み込み状況を表示して原因切り分けできる
 const DEBUG = import.meta.env.VITE_ADMOB_DEBUG === '1'
@@ -30,7 +41,8 @@ export function AdBanner() {
   const [status, setStatus] = useState<string>('init…')
 
   useEffect(() => {
-    if (premium || !isNative()) return
+    // iOS で ADS_ENABLED_IOS が false の間は AdMob.initialize を一切呼ばない（SDK を起動させない）
+    if (premium || !adsAllowed()) return
     let cancelled = false
     const handles: { remove: () => void }[] = []
 
