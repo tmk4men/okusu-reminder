@@ -23,6 +23,7 @@ import {
 } from '../lib/notify'
 import { usePremium, setPremium } from '../lib/premium'
 import { isNative } from '../lib/platform'
+import { openManageSubscriptions } from '../lib/billing'
 import { PremiumModal } from './PremiumModal'
 
 const ROWS: { key: keyof MealTimes; label: string; Icon: typeof Sun }[] = [
@@ -80,6 +81,14 @@ export function Settings() {
                 </p>
               </div>
             </div>
+            {isNative() && (
+              <button
+                onClick={() => openManageSubscriptions()}
+                className="block w-full border-t border-mint-400/20 px-4 py-3 text-left text-xs text-ink-300 active:bg-ink-700"
+              >
+                サブスクの管理・解約（月額プランの方）
+              </button>
+            )}
             {import.meta.env.DEV && (
               <button
                 onClick={() => setPremium(false)}
@@ -98,7 +107,7 @@ export function Settings() {
             <div className="flex-1">
               <p className="text-ink-100">プレミアムにアップグレード</p>
               <p className="mt-0.5 text-xs text-ink-400">
-                おくすり無制限 ・ 広告非表示 ・ ¥500 買い切り
+                おくすり無制限 ・ 広告非表示 ・ ¥300/月 または ¥500買い切り
               </p>
             </div>
           </button>

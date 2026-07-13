@@ -14,7 +14,12 @@ const TEST_BANNER_ID = 'ca-app-pub-3940256099942544/6300978111'
 const BANNER_ID = (import.meta.env.VITE_ADMOB_BANNER_ID as string | undefined) || TEST_BANNER_ID
 
 // iOS は広告オフでリリース開始。有効化する手順は IOS_RELEASE.md 参照
-// （iOS 用 AdMob アプリ作成 → Info.plist に GADApplicationIdentifier / SKAdNetworkItems 追加 → ここを true）
+// （iOS 用 AdMob アプリ作成 → Info.plist の GADApplicationIdentifier を本番IDに差し替え
+//   ＋ SKAdNetworkItems 追加 → ここを true）
+// ⚠️ 注意: このフラグは JS 側で initialize/showBanner を止めるだけ。iOS ネイティブの
+//   Google Mobile Ads SDK はリンクされたまま起動時に Info.plist の GADApplicationIdentifier を
+//   検証するので、フラグが false でもキーが無いと「起動時クラッシュ」する（審査落ち原因）。
+//   → キーは ios-setup.sh が自動注入する（テスト用App ID。広告は出さない）。
 const ADS_ENABLED_IOS = false
 
 // この端末で広告を出してよいか（iOS はフラグがオフの間は常に非表示）

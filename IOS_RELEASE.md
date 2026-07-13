@@ -85,18 +85,65 @@ xcodebuild -exportArchive -archivePath build/App.xcarchive \
 
 ---
 
-## 補足：課金（買い切り ¥480）を iOS で有効にする
+## 補足：課金（買い切り ¥500 ＋ 月額サブスク ¥300）を iOS で有効にする
 
-コードは `@capgo/native-purchases`（StoreKit）で iOS 対応済み。ただし
-App Store Connect 側で商品を作らないと購入は失敗する（アプリは落ちない）。
+プレミアムは **2プランから選択制**（コード実装済み・`@capgo/native-purchases` / StoreKit）:
+- **買い切り**: 非消耗型・製品ID `premium_lifetime`・¥500
+- **月額サブスク**: 自動更新・製品ID `premium_monthly`・¥300/月
 
-1. App Store Connect → 対象App → **App内課金** → **管理**
-2. **非消耗型**を新規作成
-   - 製品ID: `premium_lifetime`（コードと一致必須）
-   - 価格: ¥500
-3. 審査用のメタ情報を入れて、アプリ本体と一緒に審査提出
+App Store Connect 側で両方の商品を作り、**アプリのバージョンに紐付けて一緒に審査提出**する。
+商品未作成でも購入ボタンはエラーを出すだけでアプリは落ちないが、**購入UIを出す以上は機能させる**こと（未機能だと 2.1 差し戻し）。
 
-商品未作成でも「購入」ボタンはエラーメッセージを出すだけで、アプリは正常動作する。
+### ① 買い切り（非消耗型）
+1. App Store Connect → 対象App → **App内課金** → **管理** → ＋
+2. **非消耗型** / 製品ID `premium_lifetime` / 価格 ¥500 / 表示名・説明・**スクショ1枚**
+
+### ② 月額サブスク（自動更新）
+1. **サブスクリプション** → **サブスクリプショングループ**を作成（例: 「プレミアム」）
+2. グループ内に **自動更新サブスク**を追加
+   - 製品ID `premium_monthly`（コードと一致必須）
+   - 期間 **1か月** / 価格 **¥300**
+   - ローカライズ（表示名・説明）＋**レビュー用スクショ1枚**
+3. サブスクの **App審査情報**に「サブスクリプションの利用規約(EULA)」を入力
+   - 利用規約URL: `https://okusu-reminder.vercel.app/terms.html`（本対応で新規作成済）
+
+### ③ ガイドライン 3.1.2（自動更新サブスクの必須要件）
+- 購入画面に「¥300/月・自動更新・解約方法」を明記 → **アプリ側で実装済**（PremiumModal）
+- **利用規約(EULA)** と **プライバシーポリシー**への機能するリンク → アプリ内＋メタデータ両方に必要
+  - App Store Connect → **App情報** → 「利用規約（EULA）」に上記 terms.html を設定（標準EULAに追記する形でも可）
+  - プライバシーポリシーURL: `https://okusu-reminder.vercel.app/privacy.html`
+
+### ④ 提出
+①②を **build 4 のバージョンページ**の「App内課金／サブスクリプション」セクションに追加して一緒に審査提出（紐付け必須）。Sandbox テスターで購入・復元・解約反映を確認推奨。
+
+---
+
+## ⚠️ 起動時クラッシュ（審査 2.1(a)）の原因と対策 — GADApplicationIdentifier
+
+**症状**: 審査で「起動直後にクラッシュ（crashed on launch）」で差し戻し（全デバイス）。
+
+**原因**: 広告を iOS でオフ（`ADS_ENABLED_IOS=false`）にしていても、
+`@capacitor-community/admob` の **Google Mobile Ads SDK はバイナリにリンクされている**。
+この SDK は **アプリ起動時**に `Info.plist` の `GADApplicationIdentifier` を検証し、
+無いと `GADInvalidInitializationException` を投げて **起動直後にクラッシュ**する。
+JS 側の広告オフ判定は WebView 読み込み後＝クラッシュより後なので、防げない。
+
+**対策**: `Info.plist` に `GADApplicationIdentifier` を必ず入れる。広告はオフのままでよい
+（`initialize` を呼ばないので値があるだけでは広告は出ない。起動チェックを通すためだけ）。
+→ **`ios-setup.sh` が自動で注入する**（AdMob iOS テスト用 App ID
+`ca-app-pub-3940256099942544~1458002511`）。手動なら:
+
+```bash
+/usr/libexec/PlistBuddy -c \
+  "Add :GADApplicationIdentifier string ca-app-pub-3940256099942544~1458002511" \
+  ios/App/App/Info.plist
+```
+
+その後 **ビルド番号を上げて**再アーカイブ・再提出:
+
+```bash
+cd ios/App && xcrun agvtool new-version -all 4 && cd -
+```
 
 ---
 
@@ -106,9 +153,9 @@ App Store Connect 側で商品を作らないと購入は失敗する（アプ�
 
 1. AdMob 管理画面で **iOS 用アプリ**を新規作成し、iOS の App ID と
    バナー広告ユニット ID を発行
-2. `ios/App/App/Info.plist` に以下を追加
-   - `GADApplicationIdentifier` = iOS 用 AdMob App ID（`ca-app-pub-XXXX~YYYY`）
-   - `SKAdNetworkItems`（AdMob 公式ドキュメントの一覧をコピー）
+2. `ios/App/App/Info.plist` の `GADApplicationIdentifier` を
+   **本物の iOS 用 AdMob App ID**（`ca-app-pub-XXXX~YYYY`）に差し替え、
+   `SKAdNetworkItems`（AdMob 公式ドキュメントの一覧）を追加
 3. iOS 用バナー ID を環境変数へ（Android とは別 ID）
 4. `src/components/AdBanner.tsx` の
    ```ts
@@ -116,9 +163,6 @@ App Store Connect 側で商品を作らないと購入は失敗する（アプ�
    ```
    を `true` に変更
 5. `npm run build && npx cap sync ios` して再アーカイブ
-
-> `ADS_ENABLED_IOS = false` の間は `AdMob.initialize` を一切呼ばないので、
-> Info.plist に AdMob 設定が無くてもクラッシュしない。
 
 ---
 

@@ -122,7 +122,7 @@ export function Medications() {
             </div>
           </div>
           <span className="rounded-full bg-mint-400 px-3 py-1 text-xs font-medium text-ink-50">
-            ¥500
+            ¥300/月〜
           </span>
         </button>
       )}
