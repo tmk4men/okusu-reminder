@@ -79,10 +79,15 @@
 ### メモ本文（日本語）
 本アプリはお薬・サプリの飲み忘れを防ぐ服薬リマインダーです。
 
+- 前回の起動時クラッシュ（Guideline 2.1(a)）は、Info.plist の GADApplicationIdentifier 欠落が原因でした。本ビルドで追加し、実機で起動を確認済みです。
+- 本アプリは iPhone 専用です。
 - アカウント登録・ログインは不要です。すべてのデータは端末内（オフライン）に保存され、サーバーには送信しません。
 - リマインダーはローカル通知で実現しています。初回に通知の許可をお願いします。
-- App内課金：「プレミアム」(product ID: premium_lifetime / 非消耗型 / ¥500 買い切り) が1つあります。
-  テスト方法：お薬を3件登録すると無料枠が上限になり、4件目を追加しようとするとプレミアム購入画面が表示されます。設定画面の「プレミアム」からも購入・復元できます。復元は「購入を復元」ボタンで行えます。
+- App内課金「プレミアム」は2プランから選べます（どちらも広告非表示＋おくすり登録が無制限になります）。
+  - 買い切り：product ID `premium_lifetime`（非消耗型・¥500・一度のお支払い）
+  - 月額：product ID `premium_monthly`（自動更新サブスクリプション・¥300/月）
+  テスト方法：お薬を3件登録すると無料枠が上限になり、4件目を追加しようとするとプレミアム購入画面が表示されます。設定画面の「プレミアム」からも開けます。購入画面でプランを選び、購入または「購入を復元」ができます。
+- 自動更新の条件・解約方法・利用規約(EULA)・プライバシーポリシーへのリンクは購入画面内に表示しています（利用規約: https://okusu-reminder.vercel.app/terms.html ）。
 - 本バージョンでは広告（AdMob）は表示していません。
 - 本アプリは服薬の記録・管理を補助するもので、医学的な診断・治療・助言は行いません。
 
@@ -91,10 +96,15 @@
 ### メモ本文（English / 併記推奨）
 This app is a medication & supplement reminder that helps users avoid missed doses.
 
+- The previous launch crash (Guideline 2.1(a)) was caused by a missing GADApplicationIdentifier in Info.plist. It has been added in this build and launch was verified on a physical device.
+- This app is iPhone only.
 - No account or login is required. All data is stored locally on the device (offline) and is never sent to any server.
 - Reminders use local notifications; please allow notifications on first launch.
-- In-app purchase: one non-consumable "Premium" (product ID: premium_lifetime, ¥500, one-time).
-  How to test: after registering 3 medications the free limit is reached; adding a 4th shows the Premium purchase screen. Purchase/Restore is also available from Settings > Premium ("Restore Purchases" button).
+- The "Premium" in-app purchase offers two plans (both remove ads and unlock unlimited medications):
+  - One-time: product ID `premium_lifetime` (non-consumable, ¥500, one-time payment)
+  - Monthly: product ID `premium_monthly` (auto-renewable subscription, ¥300/month)
+  How to test: after registering 3 medications the free limit is reached; adding a 4th shows the Premium screen (also available from Settings > Premium). Choose a plan on that screen to purchase, or tap "Restore Purchases".
+- Auto-renewal terms, cancellation instructions, and links to the Terms of Use (EULA) and Privacy Policy are shown on the purchase screen (EULA: https://okusu-reminder.vercel.app/terms.html ).
 - This build does not display any ads (AdMob is disabled).
 - The app assists with logging/reminding only and does not provide medical diagnosis, treatment, or advice.
 
