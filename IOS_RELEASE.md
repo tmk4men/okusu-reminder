@@ -135,22 +135,25 @@ build 4〜6 まで、iPhone・iPad（互換モード）とも起動直後に SIG
 **根本対策**: iOS は広告を一切使わないので、**iOS バイナリから AdMob プラグインごと
 除去**する（Android は従来どおり AdMob を使用）。SDK がリンクされていなければ起動時
 検証そのものが走らず、原理的にクラッシュしない。
-→ **`ios-setup.sh` が自動でやる**。`cap sync` 後に `ios/App/Podfile` から
-`CapacitorCommunityAdmob` の行を削除し `pod install` し直す。最後に
-`Podfile.lock` に `Google-Mobile-Ads-SDK` が残っていないか検証し、残っていれば
-スクリプトを止める。手動でやるなら:
+
+Capacitor 8 の iOS は既定が **SPM**（`ios/App/CapApp-SPM/Package.swift` で依存管理。
+CocoaPods 構成なら `Podfile`）。AdMob は Package.swift 内で `CapacitorCommunityAdmob`
+の2行（`.package` と `.product`）として現れる。
+→ **`ios-setup.sh` が自動でやる**。`cap sync` の後にその行を削除し、`Package.resolved`
+を消して `GoogleMobileAds` を確実に外す。最後に Package.swift に AdMob が残っていない
+か検証し、残っていればスクリプトを止める。手動でやるなら（SPM の場合）:
 
 ```bash
-sed -i '' '/CapacitorCommunityAdmob/d' ios/App/Podfile
-( cd ios/App && pod install )
-grep -qi 'Google-Mobile-Ads-SDK' ios/App/Podfile.lock \
-  && echo '❌ まだリンクされています' || echo '✓ 非リンク（OK）'
+sed -i '' '/CapacitorCommunityAdmob/d' ios/App/CapApp-SPM/Package.swift
+find ios/App -name Package.resolved -delete
+grep -qiE 'CapacitorCommunityAdmob|GoogleMobileAds' ios/App/CapApp-SPM/Package.swift \
+  && echo '❌ まだ残っています' || echo '✓ 非リンク（OK）'
 ```
 
 > `GADApplicationIdentifier` の注入は残してあるが、これは「万一 SDK を戻した時に
 > 落ちないための保険」であって主対策ではない。
 
-**注意**: `npx cap sync ios` を単独で実行すると Podfile の `capacitor_pods` が
+**注意**: `npx cap sync ios` を単独で実行すると `Package.swift`（旧構成なら Podfile）が
 再生成されて **AdMob が復活しクラッシュが再発する**。Web 変更の反映も含め、
 iOS 側は必ず `./ios-setup.sh` を再実行すること。
 

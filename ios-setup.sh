@@ -104,39 +104,52 @@ else
   die "$PBXPROJ が見つかりません（iOS プロジェクト生成に失敗？）"
 fi
 
-# --- 5. 同期（Podfile 再生成 ＋ pod install）--------------------------------
+# --- 5. 同期（Package.swift / Podfile を再生成）-----------------------------
 info "Web と設定を iOS に同期（npx cap sync ios）"
 npx cap sync ios
 ok "同期完了"
 
 # --- 5.5 ★起動クラッシュの根本対策：iOS から AdMob SDK を除去 ---------------
 # 3件の起動クラッシュ(SIGABRT / GADInvalidInitializationException) の真因は、
-# @capacitor-community/admob が Google-Mobile-Ads-SDK(12.x) を静的リンクし、
-# その SDK が起動直後にバックグラウンドキューで Info.plist を検証して未捕捉の
-# NSException を投げていたこと。iOS は広告オフ(ADS_ENABLED_IOS=false)で SDK を
-# 一切使わないので、iOS バイナリからプラグインごと外せばクラッシュは原理的に起きない。
-#   ※ Android は従来どおり AdMob を使用（ここは iOS の Podfile だけを編集）。
-#   ※ cap sync は Podfile の "def capacitor_pods 〜 end" の中身だけを毎回再生成
-#     するため、この除去は必ず sync の後に行う（先に消しても sync で復活する）。
-PODFILE="ios/App/Podfile"
-if [ -f "$PODFILE" ]; then
+# @capacitor-community/admob が Google Mobile Ads SDK(12.x) を iOS バイナリに
+# リンクし、その SDK が起動直後にバックグラウンドキューで Info.plist を検証して
+# 未捕捉の NSException を投げていたこと。iOS は広告オフ(ADS_ENABLED_IOS=false)で
+# SDK を一切使わないので、iOS からプラグインごと外せばクラッシュは原理的に起きない。
+#   ※ Android は従来どおり AdMob を使用（ここは iOS の依存定義だけを編集）。
+#   ※ Capacitor 8 の既定は SPM。cap sync が CapApp-SPM/Package.swift（旧構成なら
+#     Podfile）を毎回再生成するため、この除去は必ず sync の後に行う。
+#     Package.swift では AdMob は "CapacitorCommunityAdmob" の2行(.package/.product)
+#     として出るので、その行を消せば GoogleMobileAds ごと外れる。
+SPM_PKG="ios/App/CapApp-SPM/Package.swift"   # Capacitor 8 既定（SPM）
+PODFILE="ios/App/Podfile"                    # 旧 CocoaPods 構成
+if [ -f "$SPM_PKG" ]; then
+  if grep -q "CapacitorCommunityAdmob" "$SPM_PKG"; then
+    sed -i '' '/CapacitorCommunityAdmob/d' "$SPM_PKG"
+    # SPM のロック(Package.resolved)を消して GoogleMobileAds を確実に外す
+    find ios/App -name Package.resolved -delete 2>/dev/null || true
+    ok "AdMob(GoogleMobileAds) を iOS(SPM) から除去"
+  else
+    ok "AdMob は既に iOS(SPM) から除去済み"
+  fi
+  if grep -qiE "CapacitorCommunityAdmob|GoogleMobileAds" "$SPM_PKG"; then
+    die "AdMob がまだ $SPM_PKG に残っています。起動クラッシュが再発します。"
+  fi
+  ok "検証OK: AdMob/GoogleMobileAds は iOS(SPM) に非リンク（起動クラッシュの真因を除去）"
+elif [ -f "$PODFILE" ]; then
   if grep -q "CapacitorCommunityAdmob" "$PODFILE"; then
     sed -i '' '/CapacitorCommunityAdmob/d' "$PODFILE"
-    info "iOS の Podfile から AdMob を除去 → pod install で再リンク"
     ( cd ios/App && pod install )
-    ok "AdMob(Google-Mobile-Ads-SDK) を iOS バイナリから除去"
+    ok "AdMob(Google-Mobile-Ads-SDK) を iOS(CocoaPods) から除去"
   else
-    ok "AdMob は既に iOS Podfile から除去済み"
+    ok "AdMob は既に iOS(CocoaPods) から除去済み"
   fi
+  if [ -f ios/App/Podfile.lock ] && grep -qi "Google-Mobile-Ads-SDK" ios/App/Podfile.lock; then
+    die "Google-Mobile-Ads-SDK がまだ iOS にリンクされています。起動クラッシュが再発します。"
+  fi
+  ok "検証OK: Google-Mobile-Ads-SDK は iOS(CocoaPods) に非リンク（起動クラッシュの真因を除去）"
 else
-  die "$PODFILE が見つかりません（cap sync に失敗？）"
+  die "iOS の依存定義が見つかりません（$SPM_PKG も $PODFILE も無い。cap sync 失敗？）"
 fi
-
-# --- 5.6 最終検証：クラッシュ要因が本当に消えたか（Mac 上で即フィードバック）--
-if [ -f ios/App/Podfile.lock ] && grep -qi "Google-Mobile-Ads-SDK" ios/App/Podfile.lock; then
-  die "Google-Mobile-Ads-SDK がまだ iOS にリンクされています。起動クラッシュが再発します。ios/App/Podfile を確認して pod install し直してください。"
-fi
-ok "検証OK: Google-Mobile-Ads-SDK は iOS に非リンク（起動クラッシュの真因を除去）"
 if /usr/libexec/PlistBuddy -c "Print :GADApplicationIdentifier" "$PLIST" >/dev/null 2>&1; then
   ok "検証OK: GADApplicationIdentifier も設定済み（万一 SDK を戻しても落ちない保険）"
 fi
