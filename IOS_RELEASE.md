@@ -118,31 +118,46 @@ App Store Connect 側で両方の商品を作り、**アプリのバージョン
 
 ---
 
-## ⚠️ 起動時クラッシュ（審査 2.1(a)）の原因と対策 — GADApplicationIdentifier
+## ⚠️ 起動時クラッシュ（審査 2.1(a)）の真因と根本対策 — AdMob SDK を iOS から除去
 
-**症状**: 審査で「起動直後にクラッシュ（crashed on launch）」で差し戻し（全デバイス）。
+**症状**: 審査で「起動直後にクラッシュ（crashed on launch）」で差し戻し。
+build 4〜6 まで、iPhone・iPad（互換モード）とも起動直後に SIGABRT で落ちていた。
 
-**原因**: 広告を iOS でオフ（`ADS_ENABLED_IOS=false`）にしていても、
-`@capacitor-community/admob` の **Google Mobile Ads SDK はバイナリにリンクされている**。
-この SDK は **アプリ起動時**に `Info.plist` の `GADApplicationIdentifier` を検証し、
-無いと `GADInvalidInitializationException` を投げて **起動直後にクラッシュ**する。
-JS 側の広告オフ判定は WebView 読み込み後＝クラッシュより後なので、防げない。
+**真因**（3件のクラッシュログを解析して確定）: 広告を iOS でオフ
+（`ADS_ENABLED_IOS=false`）にしていても、`@capacitor-community/admob` が
+**`Google-Mobile-Ads-SDK`(12.x) をバイナリに静的リンク**している。この SDK は
+**起動直後にバックグラウンドキュー**（`com.apple.root.default-qos`）で
+`Info.plist` を検証し、未捕捉の `NSException`（`GADInvalidInitializationException`）
+を投げて `abort()` する。JS の広告オフ判定は WebView 読み込み後＝クラッシュより
+後なので防げない。**`GADApplicationIdentifier` のキー注入だけでは build 4〜6 で
+止まらなかった**。
 
-**対策**: `Info.plist` に `GADApplicationIdentifier` を必ず入れる。広告はオフのままでよい
-（`initialize` を呼ばないので値があるだけでは広告は出ない。起動チェックを通すためだけ）。
-→ **`ios-setup.sh` が自動で注入する**（AdMob iOS テスト用 App ID
-`ca-app-pub-3940256099942544~1458002511`）。手動なら:
+**根本対策**: iOS は広告を一切使わないので、**iOS バイナリから AdMob プラグインごと
+除去**する（Android は従来どおり AdMob を使用）。SDK がリンクされていなければ起動時
+検証そのものが走らず、原理的にクラッシュしない。
+→ **`ios-setup.sh` が自動でやる**。`cap sync` 後に `ios/App/Podfile` から
+`CapacitorCommunityAdmob` の行を削除し `pod install` し直す。最後に
+`Podfile.lock` に `Google-Mobile-Ads-SDK` が残っていないか検証し、残っていれば
+スクリプトを止める。手動でやるなら:
 
 ```bash
-/usr/libexec/PlistBuddy -c \
-  "Add :GADApplicationIdentifier string ca-app-pub-3940256099942544~1458002511" \
-  ios/App/App/Info.plist
+sed -i '' '/CapacitorCommunityAdmob/d' ios/App/Podfile
+( cd ios/App && pod install )
+grep -qi 'Google-Mobile-Ads-SDK' ios/App/Podfile.lock \
+  && echo '❌ まだリンクされています' || echo '✓ 非リンク（OK）'
 ```
+
+> `GADApplicationIdentifier` の注入は残してあるが、これは「万一 SDK を戻した時に
+> 落ちないための保険」であって主対策ではない。
+
+**注意**: `npx cap sync ios` を単独で実行すると Podfile の `capacitor_pods` が
+再生成されて **AdMob が復活しクラッシュが再発する**。Web 変更の反映も含め、
+iOS 側は必ず `./ios-setup.sh` を再実行すること。
 
 その後 **ビルド番号を上げて**再アーカイブ・再提出:
 
 ```bash
-cd ios/App && xcrun agvtool new-version -all 4 && cd -
+cd ios/App && xcrun agvtool new-version -all 7 && cd -
 ```
 
 ---
@@ -170,5 +185,7 @@ cd ios/App && xcrun agvtool new-version -all 4 && cd -
 
 - **`pod install` で失敗**: `sudo gem install cocoapods`、または `brew install cocoapods`
 - **署名エラー**: Xcode > Settings > Accounts に Apple ID を追加し直す
-- **ビルドが古い**: `git pull` → `npm run build` → `npx cap sync ios` を再実行
-- **Web の変更を反映したい**: `npm run build && npx cap sync ios`（`ios-setup.sh` 再実行でも可）
+- **ビルドが古い / Web の変更を反映したい**: iOS は必ず `./ios-setup.sh` を再実行する。
+  素の `npx cap sync ios` だけだと Podfile に **AdMob が復活して起動クラッシュが再発**する
+  （sync は `capacitor_pods` を毎回再生成するため）。`ios-setup.sh` は sync 後に AdMob を
+  除去し直し、非リンクを検証してくれる。
